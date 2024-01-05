@@ -1,0 +1,38 @@
+{
+    "order": {
+      "order_number": "123456",
+      "customer_name": "John Doe",
+      "items": [
+        {
+          "item_name": "Big Mac",
+          "quantity": 2,
+          "size": "Medium",
+          "addons": [],
+          "remove": [],
+          "category": "Kitchen"
+        },
+        {
+          "item_name": "French Fries",
+          "quantity": 1,
+          "size": "Large",
+          "category": "OAT"
+        },
+        {
+          "item_name": "Coca-Cola",
+          "quantity": 2,
+          "size": "Regular",
+          "category": "Beverage"
+        }
+      ],
+      "total_price": 15.99,
+      "payment_method": "Credit Card",
+      "delivery_address": {
+        "street": "123 Main St",
+        "city": "Anytown",
+        "state": "CA",
+        "zip_code": "12345"
+      },
+      "order_time": "2024-01-04T12:30:00Z"
+    }
+  }
+  

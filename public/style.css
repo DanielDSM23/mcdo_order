@@ -1,0 +1,135 @@
+p{
+    font: 3em "Fira Sans", sans-serif;
+}
+body{
+	background-color: black;
+    overflow-y: hidden;
+	
+}
+
+#actualOrders{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    justify-items: end;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+
+#recallOrders{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    justify-items: end;
+    flex-direction: row-reverse;
+    flex-wrap: wrap;
+    top: 50vh;
+    position: absolute;
+    width: -webkit-fill-available;
+}
+*{
+    cursor: none;
+}
+
+.order{
+	background-color: white;
+	color:black;
+}
+
+.command{
+	background-color: darkgrey;
+	color: white;
+	/*font: 3em "Fira Sans", sans-serif;*/
+    float: left;
+    margin: 10px;
+    width: 47%;
+    border: 2px solid black;
+}
+
+.stateRecall{
+	background-color: #7F67AF;
+	color: white;
+	/*font: 3em "Fira Sans", sans-serif;*/
+    float: left;
+    margin: 10px;
+    width: 47%;
+    border: 2px solid black;
+}
+
+.command p, .stateRecall p{
+	margin-block-start: 0px;
+    margin-inline-start: 0px;
+    margin-block-end: 0px;
+}
+
+.order p{
+	padding: 13px 3px;
+    margin-left: 20px;
+}
+
+#selected{
+    border: 2px solid yellow;
+}
+
+#hour{
+    background-color: white;
+    color: black;
+    text-align: right;
+    margin-block-start: 0px;
+    margin-block-end: 0px;
+    position: absolute;
+    top: calc(100vh - 31px);
+    left: 0px;
+    font-size: 20pt;
+    width: 103.78px;
+}
+
+#line{
+    color :white;
+    text-align: center;
+    margin-block-start: 0px;
+    margin-block-end: 0px;
+    position: absolute;
+    top: calc(100vh - 31px);
+    left: calc(50vw - 74.095px);
+    font-size: 20pt;
+}
+
+#stateLine{
+    color:red;
+}
+
+#recallWitness{
+    visibility: hidden;
+    background-color: white;
+    color: black;
+    text-align: right;
+    margin-block-start: 0px;
+    margin-block-end: 0px;
+    position: absolute;
+    top: calc(100vh - 31px);
+    left: calc(100vw - 19.27px);
+    font-size: 20pt;
+    
+}
+
+
+#pendingOrders{
+    visibility: hidden;
+    background-color: white;
+    color: black;
+    text-align: right;
+    margin-block-start: 0px;
+    margin-block-end: 0px;
+    position: absolute;
+    top: calc(100vh - 31px);
+    left: 0;
+    font-size: 20pt;
+    width: max-content;
+    
+}
+
+.hidden{
+    visibility: hidden;
+}
