@@ -1,12 +1,53 @@
 {
     "order": {
-      "order_number": "123456",
+      "order_number": "@@1010",
       "customer_name": "John Doe",
       "items": [
         {
           "item_name": "Big Mac",
           "quantity": 2,
-          "size": "Medium",
+          "addons": [],
+          "remove": [],
+          "category": "Kitchen"
+        },
+        {
+          "item_name": "Big Tasty",
+          "quantity": 4,
+          "addons": [],
+          "remove": [],
+          "category": "Kitchen"
+        },
+        {
+          "item_name": "CBO",
+          "quantity": 2,
+          "addons": [],
+          "remove": [],
+          "category": "Kitchen"
+        },
+        {
+          "item_name": "McCrispy",
+          "quantity": 1,
+          "addons": [],
+          "remove": [],
+          "category": "Kitchen"
+        },
+        {
+          "item_name": "Petit Wrap Ranch",
+          "quantity": 9,
+          "addons": [],
+          "remove": [],
+          "category": "Kitchen"
+        },
+        {
+          "item_name": "Nuggets 20",
+          "quantity": 3,
+          "addons": [],
+          "remove": [],
+          "category": "Kitchen"
+        },
+        {
+          "item_name": "Nuggets 9",
+          "quantity": 3,
           "addons": [],
           "remove": [],
           "category": "Kitchen"

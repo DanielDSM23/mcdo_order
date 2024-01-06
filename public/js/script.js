@@ -1,32 +1,66 @@
-// Create WebSocket connection.
-const socket = await connectToServer();
-socket.addEventListener("open", (event) => {
-	console.log("connected");
+let sec = null;
+let isOrderSelected = false;
+let orderSelected = null;
+let isRecall = false;
+let previousOrder = [];
+let previousOrderDate  = [];
+let idPreviousOrder = 0;
+let hiddenCommand = 0;
+let isLineOpen = null;
+$.get('http://172.20.10.3:8080/is-line-open', function (data, status) {
+	isLineOpen = data;
+})
+.done(function () {
+	console.log('GET request succeeded');
+})
+.fail(function (jqXHR, textStatus, errorThrown) {
+	console.error('GET request failed:', textStatus, errorThrown);
+});
+let doThis = true;
+
+const socket = io('http://172.20.10.3:8080'); 
+
+socket.on('message', (data) => {
+	console.log('message event', data);
+	addCommand(data);
 });
 
-if (socket.readyState === WebSocket.OPEN) {
-	
-	socket.addEventListener("message", (event) => {
-		console.log("Message from server ", event.data);
-	});
+socket.on('connect', () => {
+	console.log('Socket.IO connection opened');
+	console.log('Connection Status:', socket.connected);
+	socket.emit("lineOpen", isLineOpen);
+});
 
-} else {
-	console.error("WebSocket connection is not open.");
-}
+socket.on('error', (error) => {
+	console.log('Socket.IO error:', error);
+});
 
+socket.on('disconnect', (reason) => {
+	console.log('Socket.IO connection closed:', reason);
+});
 
-async function connectToServer() {    
-	const ws = new WebSocket('ws://localhost:8081');
-	return new Promise((resolve, reject) => {
-		const timer = setInterval(() => {
-			if(ws.readyState === 1) {
-				clearInterval(timer);
-				resolve(ws);
-			}
-		}, 10);
-	});   
-}
-  
+socket.on("onoff", (arg) => {
+	doThis ? onOff(arg) : doThis = true;
+});
+
+socket.on("bump", (arg) => {
+	if(arg){
+		doThis ? bump() : doThis = true;
+	}
+});
+
+socket.on("next", (arg) => {
+	if(arg){
+		doThis ? next() : doThis = true;
+	}
+});
+
+socket.on("recall", (arg) => {
+	if(arg){
+		doThis ? recall() : doThis = true;
+	}
+});
+
 function timer(number){
 	
 	if(number==999){
@@ -36,6 +70,42 @@ function timer(number){
 		return number+1;
 	}
 }
+
+
+
+async function fetchDateTime() {
+    return new Promise((resolve, reject) => {
+      $.ajax({
+        url: 'http://worldtimeapi.org/api/timezone/Europe/Paris',
+        method: 'GET',
+        dataType: 'json',
+        success: function(data) {
+          const datetime = data.datetime;
+          console.log('Datetime from WorldTimeAPI:', datetime);
+
+          // Resolve the promise with the retrieved datetime
+          resolve(datetime);
+        },
+        error: function(xhr, status, error) {
+          console.error('Error fetching datetime:', error);
+
+          // Reject the promise with the error message
+          reject(error);
+        }
+      });
+    });
+  }
+
+  async function dateTime() {
+    try {
+      const datetime = await fetchDateTime();
+      console.log('Datetime received:', datetime);
+
+      // Use the datetime as needed in your application
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  }
 
 
 function numberNextOrder(){
@@ -49,27 +119,18 @@ function numberNextOrder(){
 }
 
 
-let sec = null;
-let isOrderSelected = false;
-let orderSelected = null;
-let isRecall = false;
-let previousOrder = [];
-let previousOrderDate  = [];
-let idPreviousOrder = 0;
-let hiddenCommand = 0;
-
-
 
 function isCommandTouchingBottom() {
 	var element = document.querySelector("div.command:last-of-type");
 	var elementRect = element.getBoundingClientRect();
 
-	return elementRect.bottom >= window.innerHeight;
+	return elementRect.bottom >= window.innerHeight - 31;
 }
 
 
 
 const bump = () => {
+	socket.emit("bump", true);
 	let htmlCode =$("#selected.command").html();
 	htmlCode = '<div class="stateRecall">'+htmlCode+'</div>';
 	htmlCode = htmlCode.replace('class="bottom"', 'class="bottomRecall"');
@@ -113,14 +174,17 @@ const next = () => {
 }
 
 
-const onOff = () => {
-	let stateLine = $("#stateLine").text();
-	if(stateLine == "OFF"){
+const onOff = (isLineO) => {
+	if(isLineO){
+		isLineOpen = true;
+		socket.emit("lineOpen", isLineOpen);
 		$("#stateLine").empty();
 		$("#stateLine").css("color", "green");
 		$("#stateLine").append(" ON");
 	}
 	else{
+		isLineOpen = false;
+		socket.emit("lineOpen", isLineOpen);
 		$("#stateLine").empty();
 		$("#stateLine").removeAttr('style');
 		$("#stateLine").append("OFF");
@@ -146,9 +210,7 @@ const recall = () =>{
 	}
 }
 
-const addCommand = (jsonText) => {
-	console.log(jsonText);
-	jsonArray = JSON.parse(jsonText);
+const addCommand = (jsonArray) => {
 	//checking if order is LAD
 	htmlCommand = '<div class="command">';
 	if(jsonArray.order.order_number.includes("@@")){
@@ -180,6 +242,7 @@ const addCommand = (jsonText) => {
 }
 
 $( "document" ).ready(function() {
+	onOff(isLineOpen);
 	//readTextFile();
     var x = setInterval(function() { 
     	$( ".timer" ).each(function() {
@@ -201,31 +264,78 @@ $( "document" ).ready(function() {
 		let datetime = new Date();
 		$("#hour").empty();
 		$("#hour").append(("0" + datetime.getHours()).slice(-2)+':'+("0" + datetime.getMinutes()).slice(-2)+':'+("0" + datetime.getSeconds()).slice(-2));
-		if($('div').hasClass('command') && isOrderSelected == false){
+		if($('div').hasClass('command') && !isOrderSelected){
 			$('.command:first').attr('id', 'selected');
 			isOrderSelected = true;
 			orderSelected = 1;
 		}
 		if(!$('div').hasClass('command')){
-			isOrderSelected == false;
+			isOrderSelected = false;
 		}
      }, 500);
 	 
-	 document.addEventListener('keypress', (event)=>{
+	document.addEventListener('keypress', (event)=>{
 		let keyCode = event.keyCode ? event.keyCode : event.which;
 		console.log(keyCode);
 		if(keyCode === 13) { 
+			doThis = false;
+			$.get('http://172.20.10.3:8080/bump', function (data, status) {
+				console.log('Response:', data);
+				console.log('Status:', status);
+			})
+			.done(function () {
+				console.log('GET request succeeded');
+			})
+			.fail(function (jqXHR, textStatus, errorThrown) {
+				console.error('GET request failed:', textStatus, errorThrown);
+			});
 			bump();
 		}
 		if(keyCode === 110) { 
+			doThis = false;
+			$.get('http://172.20.10.3:8080/next', function (data, status) {
+				console.log('Response:', data);
+				console.log('Status:', status);
+			})
+			.done(function () {
+				console.log('GET request succeeded');
+			})
+			.fail(function (jqXHR, textStatus, errorThrown) {
+				console.error('GET request failed:', textStatus, errorThrown);
+			});
 			next();
 		}
 		if(keyCode === 111) { //open/close line
-			onOff();
+			doThis = false;
+			$.get('http://172.20.10.3:8080/onoff', function (data, status) {
+				console.log('Response:', data);
+				console.log('Status:', status);
+			})
+			.done(function () {
+				console.log('GET request succeeded');
+			})
+			.fail(function (jqXHR, textStatus, errorThrown) {
+				console.error('GET request failed:', textStatus, errorThrown);
+			});
+			onOff(!isLineOpen);
 		}
 		if(keyCode === 114) { 
+			doThis = false;
+			$.get('http://172.20.10.3:8080/recall', function (data, status) {
+				console.log('Response:', data);
+				console.log('Status:', status);
+			})
+			.done(function () {
+				console.log('GET request succeeded');
+			})
+			.fail(function (jqXHR, textStatus, errorThrown) {
+				console.error('GET request failed:', textStatus, errorThrown);
+			});
 			recall();
 		}
-	  });
+	});
+
+	
+
 
 });
