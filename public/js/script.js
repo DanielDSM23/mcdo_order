@@ -1,3 +1,18 @@
+const DOMAIN_NAME = window.location.hostname;
+
+const updateStateOfLine = () =>{
+	$.get(`http://${DOMAIN_NAME}:8080/is-line-open`, function (data, status) {
+	isLineOpen = data;
+	onOff(isLineOpen);
+	})
+	.done(function () {
+		console.log('GET request succeeded');
+	})
+	.fail(function (jqXHR, textStatus, errorThrown) {
+		console.error('GET request failed:', textStatus, errorThrown);
+	});
+}
+
 let sec = null;
 let isOrderSelected = false;
 let orderSelected = null;
@@ -7,18 +22,11 @@ let previousOrderDate  = [];
 let idPreviousOrder = 0;
 let hiddenCommand = 0;
 let isLineOpen = null;
-$.get('http://172.20.10.3:8080/is-line-open', function (data, status) {
-	isLineOpen = data;
-})
-.done(function () {
-	console.log('GET request succeeded');
-})
-.fail(function (jqXHR, textStatus, errorThrown) {
-	console.error('GET request failed:', textStatus, errorThrown);
-});
+updateStateOfLine();
+let hasBeenDisconnected = false; // TODO : if socket reconnected after cdisconnection reload.
 let doThis = true;
 
-const socket = io('http://172.20.10.3:8080'); 
+const socket = io(`http://${DOMAIN_NAME}:8080`); 
 
 socket.on('message', (data) => {
 	console.log('message event', data);
@@ -26,9 +34,17 @@ socket.on('message', (data) => {
 });
 
 socket.on('connect', () => {
+	if(!$('.blinkInfo').hasClass('hidden')){
+		$('.blinkInfo').addClass('hidden')
+	}
 	console.log('Socket.IO connection opened');
 	console.log('Connection Status:', socket.connected);
-	socket.emit("lineOpen", isLineOpen);
+	console.log(isLineOpen);
+	if(hasBeenDisconnected){
+		updateStateOfLine();
+	}
+	//socket.emit("lineOpen", isLineOpen);
+	
 });
 
 socket.on('error', (error) => {
@@ -37,6 +53,8 @@ socket.on('error', (error) => {
 
 socket.on('disconnect', (reason) => {
 	console.log('Socket.IO connection closed:', reason);
+	hasBeenDisconnected = true;
+	$('.blinkInfo').removeClass("hidden");
 });
 
 socket.on("onoff", (arg) => {
@@ -44,9 +62,7 @@ socket.on("onoff", (arg) => {
 });
 
 socket.on("bump", (arg) => {
-	if(arg){
-		doThis ? bump() : doThis = true;
-	}
+	doThis ? bump() : doThis = true;
 });
 
 socket.on("next", (arg) => {
@@ -70,8 +86,6 @@ function timer(number){
 		return number+1;
 	}
 }
-
-
 
 async function fetchDateTime() {
     return new Promise((resolve, reject) => {
@@ -279,7 +293,23 @@ $( "document" ).ready(function() {
 		console.log(keyCode);
 		if(keyCode === 13) { 
 			doThis = false;
-			$.get('http://172.20.10.3:8080/bump', function (data, status) {
+			$.ajax({
+				url: `http://${DOMAIN_NAME}:8080/remove-command`,
+				type: 'POST', // or 'DELETE' depending on your API endpoint
+				contentType: 'application/json',
+				data: JSON.stringify({
+					"number": orderSelected
+				}),
+				success: function(response) {
+					// Handle success response here
+					console.log(response);
+				},
+				error: function(error) {
+					// Handle error here
+					console.error(error);
+				}
+			});			
+			$.get(`http://${DOMAIN_NAME}:8080/bump`, function (data, status) {
 				console.log('Response:', data);
 				console.log('Status:', status);
 			})
@@ -293,7 +323,7 @@ $( "document" ).ready(function() {
 		}
 		if(keyCode === 110) { 
 			doThis = false;
-			$.get('http://172.20.10.3:8080/next', function (data, status) {
+			$.get(`http://${DOMAIN_NAME}:8080/next`, function (data, status) {
 				console.log('Response:', data);
 				console.log('Status:', status);
 			})
@@ -307,7 +337,7 @@ $( "document" ).ready(function() {
 		}
 		if(keyCode === 111) { //open/close line
 			doThis = false;
-			$.get('http://172.20.10.3:8080/onoff', function (data, status) {
+			$.get(`http://${DOMAIN_NAME}:8080/onoff`, function (data, status) {
 				console.log('Response:', data);
 				console.log('Status:', status);
 			})
@@ -321,7 +351,7 @@ $( "document" ).ready(function() {
 		}
 		if(keyCode === 114) { 
 			doThis = false;
-			$.get('http://172.20.10.3:8080/recall', function (data, status) {
+			$.get(`http://${DOMAIN_NAME}:8080/recall`, function (data, status) {
 				console.log('Response:', data);
 				console.log('Status:', status);
 			})

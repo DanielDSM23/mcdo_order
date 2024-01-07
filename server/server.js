@@ -10,7 +10,7 @@ const httpServer = http.createServer(app);
 const io = socketIO(httpServer);
 
 var isLineOpen = false;
-
+var currentOrders = [];
 app.use(bodyParser.json());
 
 // Serve static files
@@ -22,6 +22,8 @@ app.post('/send-message', (req, res) => {
   if(isLineOpen){
     io.emit('message', message);
     res.status(200).send('Order sent successfully');
+    currentOrders.push(message);
+    console.log(currentOrders);
   }
   else{
     res.status(200).send('Order not sent, line is closed');
@@ -32,6 +34,24 @@ app.post('/send-message', (req, res) => {
 app.get('/bump', (req, res) => {
     io.emit('bump', true);
     res.status(200).send('ok');
+});
+
+app.post('/remove-command', (req, res) => {
+  const removeCommandNbr = req.body;
+  console.log(removeCommandNbr);
+  if(Boolean(Object.keys(removeCommandNbr).length)){
+    currentOrders.splice(removeCommandNbr.number-1, 1);
+    res.status(200).send('ok');
+    console.log(currentOrders);
+  }
+  else{
+    res.status(200).send('error');
+  }
+});
+
+
+app.get('/get-command', (req, res) => {
+  res.status(200).send(currentOrders);
 });
 
 app.get('/onoff', (req, res) => {
@@ -67,6 +87,13 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log('User disconnected');
   });
+
+  socket.on('remove-command', (arg) => {
+    console.log(arg-1)
+    currentOrders.splice(arg-1, 1);
+    console.log(currentOrders);
+  });
+  
 });
 
 const PORT = 8080;
