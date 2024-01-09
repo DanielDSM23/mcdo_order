@@ -11,19 +11,15 @@ OrderL1 is a server-client system built with Node.js and Socket.IO to manage and
 
 ## Screenshots
 
-<details>
   
   ![Front](screenshots/1.png)
-</details>
 
-<details>
   
   ![Front when order is sent](screenshots/2.png)
-</details>
-<details>
+
   
   ![Front when server is off](screenshots/3.png)
-</details>
+
 
 ## Usage
 
