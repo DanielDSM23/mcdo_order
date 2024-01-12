@@ -13,6 +13,37 @@ const updateStateOfLine = () =>{
 	});
 }
 
+let oldOrders = [];
+let oldOrdersTime = [];
+
+
+
+//get actual orders info
+
+
+$.get(`http://${DOMAIN_NAME}:8080/get-command`, function (ordersData, status) {
+	oldOrders = ordersData;
+	$.get(`http://${DOMAIN_NAME}:8080/get-command-time`, function (ordersTimeData, status) {
+		oldOrdersTime = ordersTimeData;
+		for(let i = 0; i<oldOrdersTime.length; i++){
+			addCommand(oldOrders[i], Math.round(Math.abs((new Date().getTime() - new Date(oldOrdersTime[i]).getTime()) / 1000)));
+		}
+	})
+	.done(function () {
+		console.log('GET request succeeded');
+	})
+	.fail(function (jqXHR, textStatus, errorThrown) {
+		console.error('GET request failed:', textStatus, errorThrown);
+	});
+})
+.done(function () {
+	console.log('GET request succeeded');
+})
+.fail(function (jqXHR, textStatus, errorThrown) {
+	console.error('GET request failed:', textStatus, errorThrown);
+});
+
+
 let sec = null;
 let isOrderSelected = false;
 let orderSelected = null;
@@ -224,7 +255,7 @@ const recall = () =>{
 	}
 }
 
-const addCommand = (jsonArray) => {
+const addCommand = (jsonArray, timer = 0) => {
 	//checking if order is LAD
 	htmlCommand = '<div class="command">';
 	if(jsonArray.order.order_number.includes("@@")){
@@ -242,7 +273,7 @@ const addCommand = (jsonArray) => {
 			htmlCommand += `<p>${jsonArray.order.items[i].quantity} ${jsonArray.order.items[i].item_name}</p>`;
 		}
 	}
-	htmlCommand += `</div><div class="bottom"><p style="margin :0px 5px;">payé<p class="timer" style="text-align: right; margin-top: -55px; margin-right: 10px;">0</p></p> </div></div>`;
+	htmlCommand += `</div><div class="bottom"><p style="margin :0px 5px;">payé<p class="timer" style="text-align: right; margin-top: -55px; margin-right: 10px;">${timer}</p></p> </div></div>`;
 	
 	$("#actualOrders").append(htmlCommand);
 	if(isCommandTouchingBottom()){

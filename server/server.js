@@ -4,6 +4,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const socketIO = require('socket.io');
+const { create } = require('domain');
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -11,6 +12,7 @@ const io = socketIO(httpServer);
 
 var isLineOpen = false;
 var currentOrders = [];
+var createdAtOrders = [];
 app.use(bodyParser.json());
 
 // Serve static files
@@ -23,7 +25,7 @@ app.post('/send-message', (req, res) => {
     io.emit('message', message);
     res.status(200).send('Order sent successfully');
     currentOrders.push(message);
-    console.log(currentOrders);
+    createdAtOrders.push(new Date());
   }
   else{
     res.status(200).send('Order not sent, line is closed');
@@ -52,6 +54,10 @@ app.post('/remove-command', (req, res) => {
 
 app.get('/get-command', (req, res) => {
   res.status(200).send(currentOrders);
+});
+
+app.get('/get-command-time', (req, res) => {
+  res.status(200).send(createdAtOrders);
 });
 
 app.get('/onoff', (req, res) => {
@@ -89,9 +95,8 @@ io.on('connection', (socket) => {
   });
 
   socket.on('remove-command', (arg) => {
-    console.log(arg-1)
     currentOrders.splice(arg-1, 1);
-    console.log(currentOrders);
+    createdAtOrders.splice(arg-1, 1);
   });
   
 });
