@@ -122,6 +122,10 @@ socket.on("cancel-state", (commandName) => {
 	}
 });
 
+socket.on("modify-state", (details) => {
+	modifyCommandState(details.split(',')[0], details.split(',')[1]);
+});
+
 function timer(number){
 	
 	if(number==999){
@@ -265,6 +269,7 @@ const recall = () =>{
 		$('#recallOrders .timer').empty();
 		let actualDate = new Date();
 		$('#recallOrders .timer').append(Math.floor((actualDate - previousOrderDate[idPreviousOrder])/1000));
+		$('#recallOrders').css("top", `calc(50vh - ${$('#recallOrders').height()} / 2)`)
 
 	}
 }

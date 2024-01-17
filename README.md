@@ -45,14 +45,60 @@ OrderL1 is a server-client system built with Node.js and Socket.IO to manage and
 
 ## Server API Endpoints
 
-- `/send-message`: Accepts POST requests to send orders to the server.
-- `/bump`: Accepts GET requests to bump an order.
-- `/remove-command`: Accepts POST requests to remove a specific order.
-- `/get-command`: Accepts GET requests to retrieve the list of current orders.
-- `/onoff`: Accepts GET requests to toggle the status of the service line.
-- `/next`: Accepts GET requests to move to the next order.
-- `/recall`: Accepts GET requests to recall a bumped order.
-- `/is-line-open`: Accepts GET requests to check if the service line is open.
+# API Endpoints
+
+1. **`/send-message`**
+   - *Method:* POST
+   - *Description:* Accepts POST requests to send orders to the server.
+
+2. **`/bump`**
+   - *Method:* GET
+   - *Description:* Accepts GET requests to bump an order.
+
+3. **`/remove-command`**
+   - *Method:* POST
+   - *Description:* Accepts POST requests to remove a specific order.
+
+4. **`/modify-state`**
+   - *Method:* POST
+   - *Description:* Accepts POST requests to modify the state of a command on the client side.
+   
+5. **`/cancel-command`**
+   - *Method:* POST
+   - *Description:* Accepts POST requests to cancel a specific command.
+
+6. **`/get-command`**
+   - *Method:* GET
+   - *Description:* Accepts GET requests to retrieve the list of current orders.
+
+7. **`/get-command-time`**
+   - *Method:* GET
+   - *Description:* Accepts GET requests to retrieve the timestamps of the current orders.
+
+8. **`/onoff`**
+   - *Method:* GET
+   - *Description:* Accepts GET requests to toggle the status of the service line.
+
+9. **`/next`**
+   - *Method:* GET
+   - *Description:* Accepts GET requests to move to the next order.
+
+10. **`/recall`**
+    - *Method:* GET
+    - *Description:* Accepts GET requests to display recall bumped order.
+
+11. **`/is-line-open`**
+    - *Method:* GET
+    - *Description:* Accepts GET requests to check if the line is open.
+
+12. **`/reload`**
+    - *Method:* GET
+    - *Description:* Accepts GET requests to trigger a reload.
+
+
+You can use this Postman collection bellow that includes a set of meticulously crafted API requests to streamline and test various functionalities of this application. Use this collection to effortlessly interact with the API, perform tests, and ensure seamless integration. Refer to the provided examples and adapt them to your needs.
+
+[<img src="https://run.pstmn.io/button.svg" alt="Run In Postman" style="width: 128px; height: 32px;">](https://app.getpostman.com/run-collection/23821582-b15760f8-20b8-4e63-a899-aad9401db907?action=collection%2Ffork&source=rip_markdown&collection-url=entityId%3D23821582-b15760f8-20b8-4e63-a899-aad9401db907%26entityType%3Dcollection%26workspaceId%3D0ccd6d29-702c-4b0a-8f29-5ed6994e13dc)
 
 ## Client Side Script
 
