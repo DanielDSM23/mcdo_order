@@ -45,8 +45,6 @@ OrderL1 is a server-client system built with Node.js and Socket.IO to manage and
 
 ## Server API Endpoints
 
-# API Endpoints
-
 1. **`/send-message`**
    - *Method:* POST
    - *Description:* Accepts POST requests to send orders to the server.
