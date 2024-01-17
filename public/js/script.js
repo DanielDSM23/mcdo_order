@@ -200,10 +200,10 @@ const bump = () => {
 	htmlCode = htmlCode.replace('</p><p class="timer"', '<svg viewBox="8.465 7.343 286.871 115.363" xmlns="http://www.w3.org/2000/svg" style="background: white; height: 43px; border-radius: 7px; margin-left: 100px;position: relative; top: 5px;"> <defs> <linearGradient gradientUnits="userSpaceOnUse" x1="240.47" y1="124.439" x2="240.47" y2="238.789" id="gradient-0" gradientTransform="matrix(1, 0, 0, 1, -88.565019, -116.591927)"> <stop offset="0" style="stop-color: rgba(121, 88, 147, 0.68)"/> <stop offset="1" style="stop-color: rgba(68, 50, 83, 0.79); stop-opacity: 0.22;"/> </linearGradient> <linearGradient gradientUnits="userSpaceOnUse" x1="240.47" y1="124.439" x2="240.47" y2="238.789" id="gradient-1" gradientTransform="matrix(1, 0, 0, 1, -88.565019, -116.591927)"> <stop offset="0" style="stop-color: rgba(0, 0, 0, 1)"/> <stop offset="1" style="stop-color: rgba(0, 0, 0, 1)"/> </linearGradient> </defs> <rect x="8.968" y="7.847" width="285.874" height="114.35" rx="21.803" ry="21.803" style="fill-rule: nonzero; paint-order: fill; fill: url(#gradient-0); stroke: url(#gradient-1);"/> <text style="fill: rgb(88, 68, 105); font-family: Verdana; font-size: 15.7px; white-space: pre;" transform="matrix(2.982788, 0, 0, 2.870968, -312.736847, -469.538177)" x="132.848" y="191.143">Recall</text> </svg></p><p class="timer"');
 	htmlCode = htmlCode.replace('background-color: red;', '');
 	//storing order to array
-	previousOrder.push(htmlCode);
+	previousOrder.unshift(htmlCode);
 	var actualDate = new Date();
 	var secondsToSubtract = $(`.command:nth-child(${orderSelected})   .timer`).text();
-	previousOrderDate.push(actualDate.setSeconds(actualDate.getSeconds() - secondsToSubtract));
+	previousOrderDate.unshift(actualDate.setSeconds(actualDate.getSeconds() - secondsToSubtract));
 	//
 	$("#selected.command").remove();
 	$(`.command:nth-child(${orderSelected})`).removeAttr('id');//clear id actual order
@@ -232,6 +232,7 @@ const next = () => {
 			idPreviousOrder++;
 			$('#recallOrders').empty();
 			$('#recallOrders').append(previousOrder[idPreviousOrder]);
+			$('#recallOrders').css("top", `calc(50vh - ${$('#recallOrders').height()}px / 2)`);
 		}
 	}
 }
@@ -254,7 +255,7 @@ const onOff = (isLineO) => {
 	}
 }
 
-const recall = () =>{
+const recall = () => {
 	if(previousOrder.length!=0){
 		isRecall = !isRecall;
 	}
@@ -269,7 +270,7 @@ const recall = () =>{
 		$('#recallOrders .timer').empty();
 		let actualDate = new Date();
 		$('#recallOrders .timer').append(Math.floor((actualDate - previousOrderDate[idPreviousOrder])/1000));
-		$('#recallOrders').css("top", `calc(50vh - ${$('#recallOrders').height()} / 2)`)
+		$('#recallOrders').css("top", `calc(50vh - ${$('#recallOrders').height()}px / 2)`);
 
 	}
 }
@@ -290,6 +291,12 @@ const addCommand = (jsonArray, timer = 0, state = "Total") => {
 	for(let i=0; i < jsonArray.order.items.length; i++){
 		if(jsonArray.order.items[i].category == "Kitchen"){
 			htmlCommand += `<p>${jsonArray.order.items[i].quantity} ${jsonArray.order.items[i].item_name}</p>`;
+			for(let k=0; k < jsonArray.order.items[i].addons.length; k++){
+				htmlCommand+=`<p class="indent"> <img src="with.svg" style="width:75px;"/>    ${jsonArray.order.items[i].addons[k]}</p>`;
+			}
+			for(let k=0; k < jsonArray.order.items[i].remove.length; k++){
+				htmlCommand+=`<p class="indent"> <img src="without.svg" style="width:75px;"/>    ${jsonArray.order.items[i].remove[k]}</p>`;
+			}
 		}
 	}
 	htmlCommand += `</div><div class="bottom"><p style="margin :0px 5px;" class="state">${state}<p class="timer" style="text-align: right; margin-top: -55px; margin-right: 10px;">${timer}</p></p> </div></div>`;

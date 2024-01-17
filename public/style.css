@@ -147,6 +147,10 @@ body{
     z-index: 10;
 }
 
+.indent{
+    text-indent: 10%;
+}
+
 @keyframes blink-animation {
     to {
         visibility: hidden;

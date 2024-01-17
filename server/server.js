@@ -18,7 +18,7 @@ app.use(bodyParser.json());
 // Serve static files
 app.use(express.static(path.join(__dirname, '../public')));
 
-// Handle incoming HTTP POST, GET requests
+// Handle incoming HTTP POST & GET requests
 app.post('/send-message', (req, res) => {
   const message = req.body;
   if(isLineOpen){
