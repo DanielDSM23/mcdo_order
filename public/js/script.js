@@ -26,7 +26,9 @@ $.get(`http://${DOMAIN_NAME}:8080/get-command`, function (ordersData, status) {
 	$.get(`http://${DOMAIN_NAME}:8080/get-command-time`, function (ordersTimeData, status) {
 		oldOrdersTime = ordersTimeData;
 		for(let i = 0; i<oldOrdersTime.length; i++){
-			addCommand(oldOrders[i], Math.round(Math.abs((new Date().getTime() - new Date(oldOrdersTime[i]).getTime()) / 1000)));
+			let timerCount = Math.round(Math.abs((new Date().getTime() - new Date(oldOrdersTime[i]).getTime()) / 1000));
+			timerCount = timerCount < 999 ? timerCount : 999;
+			addCommand(oldOrders[i], timerCount);
 		}
 	})
 	.done(function () {
@@ -105,6 +107,18 @@ socket.on("next", (arg) => {
 socket.on("recall", (arg) => {
 	if(arg){
 		doThis ? recall() : doThis = true;
+	}
+});
+
+socket.on("reload", (arg) => {
+	if(arg){
+		location.reload();
+	}
+});
+
+socket.on("cancel-state", (commandName) => {
+	if(commandName){
+		cancelCommand(commandName);
 	}
 });
 
@@ -255,16 +269,16 @@ const recall = () =>{
 	}
 }
 
-const addCommand = (jsonArray, timer = 0) => {
+const addCommand = (jsonArray, timer = 0, state = "Total") => {
+	numberCommand = jsonArray.order.order_number;
 	//checking if order is LAD
-	htmlCommand = '<div class="command">';
+	htmlCommand = `<div class="command" value="${numberCommand}">`;
 	if(jsonArray.order.order_number.includes("@@")){
 		htmlCommand += '<svg viewBox="0 0 164.799 103.699" xmlns="http://www.w3.org/2000/svg" style="height :55px; position:absolute;"><defs></defs><ellipse style="fill: rgb(216, 255, 189); stroke: rgb(75, 138, 8);" cx="82.791" cy="52.129" rx="79.877" ry="45"></ellipse><text style="white-space: pre; fill: rgb(75, 138, 8); font-family: Verdana, sans-serif; font-size: 40px;" x="43.161" y="63.779">LAD</text></svg>';
 	}
 	else{
 		htmlCommand += '<svg viewBox="0 0 164.799 103.699" xmlns="http://www.w3.org/2000/svg" style="height :55px; position:absolute;"><defs></defs><ellipse style="fill: rgb(255, 255, 255); stroke: rgb(0, 0, 0);" cx="82.791" cy="52.129" rx="79.877" ry="45"></ellipse><text style="white-space: pre; fill: black; font-family: Verdana, sans-serif; font-size: 40px;" x="52" y="63.779">CB</text></svg>';
 	}
-	numberCommand = jsonArray.order.order_number;
 	htmlCommand += `<p style="text-align: right; margin-right:10px;">${numberCommand}</p>`;
 	//parsing command
 	htmlCommand += `<div class="order">`;
@@ -273,7 +287,7 @@ const addCommand = (jsonArray, timer = 0) => {
 			htmlCommand += `<p>${jsonArray.order.items[i].quantity} ${jsonArray.order.items[i].item_name}</p>`;
 		}
 	}
-	htmlCommand += `</div><div class="bottom"><p style="margin :0px 5px;">payé<p class="timer" style="text-align: right; margin-top: -55px; margin-right: 10px;">${timer}</p></p> </div></div>`;
+	htmlCommand += `</div><div class="bottom"><p style="margin :0px 5px;" class="state">${state}<p class="timer" style="text-align: right; margin-top: -55px; margin-right: 10px;">${timer}</p></p> </div></div>`;
 	
 	$("#actualOrders").append(htmlCommand);
 	if(isCommandTouchingBottom()){
@@ -286,6 +300,23 @@ const addCommand = (jsonArray, timer = 0) => {
 	}
 }
 
+const modifyCommandState = (commandName, commandState) => {
+	$(`.command[value="${commandName}"] .state`).text(commandState);
+}
+
+const cancelCommand = (commandName) => {
+	let width = $(`.command[value="${commandName}"] .order`).width();
+	let height = $(`.command[value="${commandName}"] .order`).height();
+	$(`.command[value="${commandName}"] .order`).css("background-color", "purple");
+	$(`.command[value="${commandName}"] .order`).prepend(
+		`<svg height="${height}" width="${width}" style="position: absolute;">
+  			<line x1="0" y1="0" x2="${width}" y2="${height}" stroke="red" stroke-width="1"></line>
+  			<line x1="0" y1="${height}" x2="${width}" y2="0" stroke="red" stroke-width="1"></line>
+		</svg>`);
+	modifyCommandState(commandName, "Annulé");
+
+
+}
 $( "document" ).ready(function() {
 	onOff(isLineOpen);
 	//readTextFile();

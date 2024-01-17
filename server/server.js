@@ -52,6 +52,30 @@ app.post('/remove-command', (req, res) => {
 });
 
 
+app.post('/modify-state', (req, res) => { //TODO CLIENT_SIDE
+  const commandName = req.body.commandName;
+  const newState = req.body.newState;
+  if(Boolean(Object.keys(commandName).length) && Boolean(Object.keys(newState).length)){
+    io.emit('modify-state', `${commandName},${newState}`);
+    res.status(200).send('ok');
+  }
+  else{
+    res.status(200).send('error');
+  }
+});
+
+app.post('/cancel-command', (req, res) => {
+  const commandName = req.body.commandName;
+  if(Boolean(Object.keys(commandName).length)){
+    io.emit('cancel-state', commandName);
+    res.status(200).send('ok');
+  }
+  else{
+    res.status(200).send('error');
+  }
+});
+
+
 app.get('/get-command', (req, res) => {
   res.status(200).send(currentOrders);
 });
@@ -77,6 +101,11 @@ app.get('/recall', (req, res) => {
 
 app.get('/is-line-open', (req, res) => {
   res.status(200).send(isLineOpen);
+});
+
+app.get('/reload', (req, res) => {
+  io.emit('reload', true);
+  res.status(200).send("ok");
 });
 
 
