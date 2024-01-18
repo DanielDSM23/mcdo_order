@@ -19,6 +19,10 @@ OrderL1 is a server-client system built with Node.js and Socket.IO to manage and
 
   
   ![Front when server is off](screenshots/3.png)
+  
+  ![Addons & without](screenshots/4.png)
+
+  ![Front when order is cancelled](screenshots/5.png)
 
 
 ## Usage
