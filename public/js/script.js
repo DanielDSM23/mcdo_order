@@ -52,6 +52,7 @@ let orderSelected = null;
 let isRecall = false;
 let previousOrder = [];
 let previousOrderDate  = [];
+let previousOrderNumber = [];
 let idPreviousOrder = 0;
 let hiddenCommand = 0;
 let isLineOpen = null;
@@ -194,9 +195,13 @@ function isCommandTouchingBottom() {
 
 const bump = () => {
 	socket.emit("bump", true);
+	let commandNumber = $(`.command:nth-child(${orderSelected})`).attr('value');
 	let htmlCode =$("#selected.command").html();
-	htmlCode = '<div class="stateRecall">'+htmlCode+'</div>';
+	let width = $("#selected.command .order").width()
+	let height = $("#selected.command .order").height()
+	htmlCode = `<div class="stateRecall">`+htmlCode+'</div>';
 	htmlCode = htmlCode.replace('class="bottom"', 'class="bottomRecall"');
+	htmlCode = htmlCode.replace('class="order"', `class="order" w="${width}" h="${height}"`);
 	htmlCode = htmlCode.replace('</p><p class="timer"', '<svg viewBox="8.465 7.343 286.871 115.363" xmlns="http://www.w3.org/2000/svg" style="background: white; height: 43px; border-radius: 7px; margin-left: 100px;position: relative; top: 5px;"> <defs> <linearGradient gradientUnits="userSpaceOnUse" x1="240.47" y1="124.439" x2="240.47" y2="238.789" id="gradient-0" gradientTransform="matrix(1, 0, 0, 1, -88.565019, -116.591927)"> <stop offset="0" style="stop-color: rgba(121, 88, 147, 0.68)"/> <stop offset="1" style="stop-color: rgba(68, 50, 83, 0.79); stop-opacity: 0.22;"/> </linearGradient> <linearGradient gradientUnits="userSpaceOnUse" x1="240.47" y1="124.439" x2="240.47" y2="238.789" id="gradient-1" gradientTransform="matrix(1, 0, 0, 1, -88.565019, -116.591927)"> <stop offset="0" style="stop-color: rgba(0, 0, 0, 1)"/> <stop offset="1" style="stop-color: rgba(0, 0, 0, 1)"/> </linearGradient> </defs> <rect x="8.968" y="7.847" width="285.874" height="114.35" rx="21.803" ry="21.803" style="fill-rule: nonzero; paint-order: fill; fill: url(#gradient-0); stroke: url(#gradient-1);"/> <text style="fill: rgb(88, 68, 105); font-family: Verdana; font-size: 15.7px; white-space: pre;" transform="matrix(2.982788, 0, 0, 2.870968, -312.736847, -469.538177)" x="132.848" y="191.143">Recall</text> </svg></p><p class="timer"');
 	htmlCode = htmlCode.replace('background-color: red;', '');
 	//storing order to array
@@ -204,6 +209,7 @@ const bump = () => {
 	var actualDate = new Date();
 	var secondsToSubtract = $(`.command:nth-child(${orderSelected})   .timer`).text();
 	previousOrderDate.unshift(actualDate.setSeconds(actualDate.getSeconds() - secondsToSubtract));
+	previousOrderNumber.unshift( $(`.command:nth-child(${orderSelected})`).attr('value') );
 	//
 	$("#selected.command").remove();
 	$(`.command:nth-child(${orderSelected})`).removeAttr('id');//clear id actual order
@@ -232,7 +238,12 @@ const next = () => {
 			idPreviousOrder++;
 			$('#recallOrders').empty();
 			$('#recallOrders').append(previousOrder[idPreviousOrder]);
-			$('#recallOrders').css("top", `calc(50vh - ${$('#recallOrders').height()}px / 2)`);
+			$('#recallOrders .timer').empty();
+			let actualDate = new Date();
+			let timerCount = (Math.floor((actualDate - previousOrderDate[idPreviousOrder])/1000)) < 999 ? Math.floor((actualDate - previousOrderDate[idPreviousOrder])/1000) : 999;
+			$('#recallOrders .timer').append(timerCount);
+			let recalibration = $('#recallOrders').height() > 500 ? `-` : `+`; 
+			$('#recallOrders').css("top", `calc(50vh  ${ recalibration + " " + $('#recallOrders').height() }px / 2)`);
 		}
 	}
 }
@@ -255,8 +266,11 @@ const onOff = (isLineO) => {
 	}
 }
 
-const recall = () => {
-	if(previousOrder.length!=0){
+const recall = (orderToDisplay = null) => {
+	if(orderToDisplay != null){
+		$('#recallOrders').empty();
+	}
+	if(previousOrder.length!=0 && orderToDisplay == null){
 		isRecall = !isRecall;
 	}
 	if(isRecall == false){
@@ -264,19 +278,22 @@ const recall = () => {
 		$("#recallWitness").css('visibility', 'hidden');
 	}
 	else if(isRecall == true){
-		idPreviousOrder = 0;
+		orderToDisplay == null ? idPreviousOrder=0 : idPreviousOrder=orderToDisplay;
 		$("#recallWitness").css('visibility', 'visible');
 		$('#recallOrders').append(previousOrder[idPreviousOrder]);
 		$('#recallOrders .timer').empty();
 		let actualDate = new Date();
-		$('#recallOrders .timer').append(Math.floor((actualDate - previousOrderDate[idPreviousOrder])/1000));
-		$('#recallOrders').css("top", `calc(50vh - ${$('#recallOrders').height()}px / 2)`);
+		let timerCount = (Math.floor((actualDate - previousOrderDate[idPreviousOrder])/1000)) < 999 ? Math.floor((actualDate - previousOrderDate[idPreviousOrder])/1000) : 999;
+		$('#recallOrders .timer').append(timerCount);
+		let recalibration = $('#recallOrders').height() > 500 ? `-` : `+`; 
+		$('#recallOrders').css("top", `calc(50vh  ${ recalibration + " " + $('#recallOrders').height() }px / 2)`);
 
 	}
 }
 
 const addCommand = (jsonArray, timer = 0, state = "Total") => {
-	numberCommand = jsonArray.order.order_number;
+	//formattedTime = new Date().toLocaleTimeString('fr-FR', { hour12: false });
+	numberCommand = `${jsonArray.order.order_number}`;
 	//checking if order is LAD
 	htmlCommand = `<div class="command" value="${numberCommand}">`;
 	if(jsonArray.order.order_number.includes("@@")){
@@ -314,6 +331,16 @@ const addCommand = (jsonArray, timer = 0, state = "Total") => {
 
 const modifyCommandState = (commandName, commandState) => {
 	$(`.command[value="${commandName}"] .state`).text(commandState);
+	//for recall
+	let element = previousOrderNumber.indexOf(commandName);
+	if(element != -1){
+		previousOrderJQuery = $(previousOrder[element]);
+		previousOrderJQuery.find(`.state`).empty().append(`${commandState} <svg viewBox="8.465 7.343 286.871 115.363" xmlns="http://www.w3.org/2000/svg" style="background: white; height: 43px; border-radius: 7px; margin-left: 100px;position: relative; top: 5px;"> <defs> <linearGradient gradientUnits="userSpaceOnUse" x1="240.47" y1="124.439" x2="240.47" y2="238.789" id="gradient-0" gradientTransform="matrix(1, 0, 0, 1, -88.565019, -116.591927)"> <stop offset="0" style="stop-color: rgba(121, 88, 147, 0.68)"></stop> <stop offset="1" style="stop-color: rgba(68, 50, 83, 0.79); stop-opacity: 0.22;"></stop> </linearGradient> <linearGradient gradientUnits="userSpaceOnUse" x1="240.47" y1="124.439" x2="240.47" y2="238.789" id="gradient-1" gradientTransform="matrix(1, 0, 0, 1, -88.565019, -116.591927)"> <stop offset="0" style="stop-color: rgba(0, 0, 0, 1)"></stop> <stop offset="1" style="stop-color: rgba(0, 0, 0, 1)"></stop> </linearGradient> </defs> <rect x="8.968" y="7.847" width="285.874" height="114.35" rx="21.803" ry="21.803" style="fill-rule: nonzero; paint-order: fill; fill: url(#gradient-0); stroke: url(#gradient-1);"></rect> <text style="fill: rgb(88, 68, 105); font-family: Verdana; font-size: 15.7px; white-space: pre;" transform="matrix(2.982788, 0, 0, 2.870968, -312.736847, -469.538177)" x="132.848" y="191.143">Recall</text> </svg>`);
+		previousOrder[element] = `<div class="stateRecall">`+previousOrderJQuery.html()+`</div>`;
+		if(idPreviousOrder == element && isRecall){
+			recall(element);
+		}
+	}
 }
 
 const cancelCommand = (commandName) => {
@@ -325,8 +352,25 @@ const cancelCommand = (commandName) => {
   			<line x1="0" y1="0" x2="${width}" y2="${height}" stroke="red" stroke-width="1"></line>
   			<line x1="0" y1="${height}" x2="${width}" y2="0" stroke="red" stroke-width="1"></line>
 		</svg>`);
+	//for recall
+	let element = previousOrderNumber.indexOf(commandName);
+	if(element != -1){
+		previousOrderJQuery = $(previousOrder[element]);
+		width = previousOrderJQuery.find(`.order`).attr("w");
+		height = previousOrderJQuery.find(`.order`).attr("h");
+		previousOrderJQuery.find(`.order`).css("background-color", "purple");
+		previousOrderJQuery.find(`.order`).prepend(
+			`<svg height="${height}" width="${width}" style="position: absolute;">
+  				<line x1="0" y1="0" x2="${width}" y2="${height}" stroke="red" stroke-width="1"></line>
+  				<line x1="0" y1="${height}" x2="${width}" y2="0" stroke="red" stroke-width="1"></line>
+			</svg>`
+		);
+		previousOrder[element] = `<div class="stateRecall">`+previousOrderJQuery.html()+`</div>`;
+		if(idPreviousOrder == element && isRecall){
+			recall(element);
+		}
+	}
 	modifyCommandState(commandName, "Annulé");
-
 
 }
 $( "document" ).ready(function() {
