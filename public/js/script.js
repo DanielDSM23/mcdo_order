@@ -195,7 +195,11 @@ function isCommandTouchingBottom() {
 
 const bump = () => {
 	socket.emit("bump", true);
-	let commandNumber = $(`.command:nth-child(${orderSelected})`).attr('value');
+	//let commandNumber = $(`.command:nth-child(${orderSelected})`).attr('value');
+	//check if user has command selected
+	if($('#selected').length == 0){
+		return;
+	}
 	let htmlCode =$("#selected.command").html();
 	let width = $("#selected.command .order").width()
 	let height = $("#selected.command .order").height()
