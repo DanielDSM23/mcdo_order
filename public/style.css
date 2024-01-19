@@ -4,6 +4,7 @@ p{
 body{
 	background-color: black;
     overflow-y: hidden;
+    overflow-x: hidden;
 	
 }
 
@@ -149,6 +150,7 @@ body{
 
 .indent{
     text-indent: 10%;
+    width: 40%;
 }
 
 @keyframes blink-animation {
@@ -156,3 +158,5 @@ body{
         visibility: hidden;
     }
 }
+
+

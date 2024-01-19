@@ -1,5 +1,8 @@
 const DOMAIN_NAME = window.location.hostname;
 
+
+const HALF_SCREEN_WIDTH = window.innerHeight / 2;
+
 const updateStateOfLine = () =>{
 	$.get(`http://${DOMAIN_NAME}:8080/is-line-open`, function (data, status) {
 	isLineOpen = data;
@@ -323,6 +326,16 @@ const addCommand = (jsonArray, timer = 0, state = "Total") => {
 	htmlCommand += `</div><div class="bottom"><p style="margin :0px 5px;" class="state">${state}<p class="timer" style="text-align: right; margin-top: -55px; margin-right: 10px;">${timer}</p></p> </div></div>`;
 	
 	$("#actualOrders").append(htmlCommand);
+	// resizing when too large 
+	if($(`.command[value="${numberCommand}"]`).height() > HALF_SCREEN_WIDTH){
+		$(`.command[value="${numberCommand}"]`).css('width', '100%')
+		$(`.command[value="${numberCommand}"] .order`).css({
+			'display': 'flex',
+			'flex-flow': 'column wrap',
+			'max-height': '50vh'
+		});
+	}
+	// pending orders
 	if(isCommandTouchingBottom()){
 		$("div.command:last-of-type").addClass("hidden");
 		hiddenCommand++;
@@ -331,6 +344,8 @@ const addCommand = (jsonArray, timer = 0, state = "Total") => {
 		$("#pendingOrders").css({"visibility": "visible",
 								 "left": `calc(100vw - ${$("#pendingOrders").width()}px)`});
 	}
+
+	
 }
 
 const modifyCommandState = (commandName, commandState) => {
