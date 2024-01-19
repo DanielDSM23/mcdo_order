@@ -56,6 +56,7 @@ let isRecall = false;
 let previousOrder = [];
 let previousOrderDate  = [];
 let previousOrderNumber = [];
+let isFullWidthOrder = [];
 let idPreviousOrder = 0;
 let hiddenCommand = 0;
 let isLineOpen = null;
@@ -218,6 +219,7 @@ const bump = () => {
 	previousOrderDate.unshift(actualDate.setSeconds(actualDate.getSeconds() - secondsToSubtract));
 	previousOrderNumber.unshift( $(`.command:nth-child(${orderSelected})`).attr('value') );
 	//
+	$('#selected.command').attr('style') === 'width: 100%;' ? isFullWidthOrder.unshift(true) : isFullWidthOrder.unshift(false);
 	$("#selected.command").remove();
 	$(`.command:nth-child(${orderSelected})`).removeAttr('id');//clear id actual order
 	orderSelected = 1;
@@ -229,6 +231,7 @@ const bump = () => {
 	if(hiddenCommand == 0){
 		$("#pendingOrders").css("visibility", "hidden");
 	}
+	
 	console.log("impression ticket");
 }
 
@@ -251,6 +254,7 @@ const next = () => {
 			$('#recallOrders .timer').append(timerCount);
 			let recalibration = $('#recallOrders').height() > 500 ? `-` : `+`; 
 			$('#recallOrders').css("top", `calc(50vh  ${ recalibration + " " + $('#recallOrders').height() }px / 2)`);
+			isFullWidthOrder[idPreviousOrder] ? $('.stateRecall').css("width", "100%") : $('.stateRecall').removeAttr('style'); 
 		}
 	}
 }
@@ -278,7 +282,7 @@ const recall = (orderToDisplay = null) => {
 		$('#recallOrders').empty();
 	}
 	if(previousOrder.length!=0 && orderToDisplay == null){
-		isRecall = !isRecall;
+		isRecall = !isRecall; 
 	}
 	if(isRecall == false){
 		$('#recallOrders').empty();
@@ -288,6 +292,7 @@ const recall = (orderToDisplay = null) => {
 		orderToDisplay == null ? idPreviousOrder=0 : idPreviousOrder=orderToDisplay;
 		$("#recallWitness").css('visibility', 'visible');
 		$('#recallOrders').append(previousOrder[idPreviousOrder]);
+		isFullWidthOrder[idPreviousOrder] ? $('.stateRecall').css("width", "100%") : $('.stateRecall').removeAttr('style'); 
 		$('#recallOrders .timer').empty();
 		let actualDate = new Date();
 		let timerCount = (Math.floor((actualDate - previousOrderDate[idPreviousOrder])/1000)) < 999 ? Math.floor((actualDate - previousOrderDate[idPreviousOrder])/1000) : 999;
