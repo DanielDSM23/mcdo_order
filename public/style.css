@@ -30,7 +30,7 @@ body{
     width: -webkit-fill-available;
 }
 *{
-    cursor: none;
+    /* cursor: none; */
 }
 
 .order{

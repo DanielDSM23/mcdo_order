@@ -4,7 +4,7 @@ const DOMAIN_NAME = window.location.hostname;
 const HALF_SCREEN_WIDTH = window.innerHeight / 2;
 
 const updateStateOfLine = () =>{
-	$.get(`http://${DOMAIN_NAME}:8080/is-line-open`, function (data, status) {
+	$.get(`http://${DOMAIN_NAME}:8080/api/is-line-open`, function (data, status) {
 	isLineOpen = data;
 	onOff(isLineOpen);
 	})
@@ -24,9 +24,9 @@ let oldOrdersTime = [];
 //get actual orders info
 
 
-$.get(`http://${DOMAIN_NAME}:8080/get-command`, function (ordersData, status) {
+$.get(`http://${DOMAIN_NAME}:8080/api/get-command`, function (ordersData, status) {
 	oldOrders = ordersData;
-	$.get(`http://${DOMAIN_NAME}:8080/get-command-time`, function (ordersTimeData, status) {
+	$.get(`http://${DOMAIN_NAME}:8080/api/get-command-time`, function (ordersTimeData, status) {
 		oldOrdersTime = ordersTimeData;
 		for(let i = 0; i<oldOrdersTime.length; i++){
 			let timerCount = Math.round(Math.abs((new Date().getTime() - new Date(oldOrdersTime[i]).getTime()) / 1000));
@@ -321,10 +321,10 @@ const addCommand = (jsonArray, timer = 0, state = "Total") => {
 		if(jsonArray.order.items[i].category == "Kitchen"){
 			htmlCommand += `<p>${jsonArray.order.items[i].quantity} ${jsonArray.order.items[i].item_name}</p>`;
 			for(let k=0; k < jsonArray.order.items[i].addons.length; k++){
-				htmlCommand+=`<p class="indent"> <img src="with.svg" style="width:75px;"/>    ${jsonArray.order.items[i].addons[k]}</p>`;
+				htmlCommand+=`<p class="indent"> <img src="svg/with.svg" style="width:75px;"/>    ${jsonArray.order.items[i].addons[k]}</p>`;
 			}
 			for(let k=0; k < jsonArray.order.items[i].remove.length; k++){
-				htmlCommand+=`<p class="indent"> <img src="without.svg" style="width:75px;"/>    ${jsonArray.order.items[i].remove[k]}</p>`;
+				htmlCommand+=`<p class="indent"> <img src="svg/without.svg" style="width:75px;"/>    ${jsonArray.order.items[i].remove[k]}</p>`;
 			}
 		}
 	}
@@ -397,6 +397,32 @@ const cancelCommand = (commandName) => {
 	modifyCommandState(commandName, "Annulé");
 
 }
+
+const addArticle = (commandName, article, quantity) => {
+	let commandArray = [];
+	let commandArrayQuantity = [];
+	$(`#selected[value="${commandName}"] .order p`).each(function() {
+		var textParts = $(this).text().split(' '); 
+		var quantity = textParts[0]; 
+		var itemName = textParts.slice(1).join(' '); 
+		commandArrayQuantity.push(quantity); 
+		commandArray.push(itemName); 
+	});
+	console.log(commandArray);
+	if(commandArray.indexOf(article)!=-1){
+		let index = commandArray.indexOf(article);
+		let outQuantity = +commandArrayQuantity[index] + quantity;
+		$(`#selected[value="${commandName}"] .order p:nth-child(${index + 1})`).empty();
+		$(`#selected[value="${commandName}"] .order p:nth-child(${index + 1})`).append(`<img src="svg/add.svg" alt="add" style="width:70px;"/>${outQuantity} ${article}`);
+		$(`#selected[value="${commandName}"] .order p:nth-child(${index + 1})`).css({"display": "flex", 
+																					"align-items": "center"});
+	}
+	else{
+		$(`.command[value="${commandName}"] .order`).append(`<p>${quantity} ${article}</p>`);
+	}
+
+}
+
 $( "document" ).ready(function() {
 	onOff(isLineOpen);
 	//readTextFile();
@@ -436,7 +462,7 @@ $( "document" ).ready(function() {
 		if(keyCode === 13) { 
 			doThis = false;
 			$.ajax({
-				url: `http://${DOMAIN_NAME}:8080/remove-command`,
+				url: `http://${DOMAIN_NAME}:8080/api/remove-command`,
 				type: 'POST', // or 'DELETE' depending on your API endpoint
 				contentType: 'application/json',
 				data: JSON.stringify({
@@ -451,7 +477,7 @@ $( "document" ).ready(function() {
 					console.error(error);
 				}
 			});			
-			$.get(`http://${DOMAIN_NAME}:8080/bump`, function (data, status) {
+			$.get(`http://${DOMAIN_NAME}:8080/api/bump`, function (data, status) {
 				console.log('Response:', data);
 				console.log('Status:', status);
 			})
@@ -465,7 +491,7 @@ $( "document" ).ready(function() {
 		}
 		if(keyCode === 110) { 
 			doThis = false;
-			$.get(`http://${DOMAIN_NAME}:8080/next`, function (data, status) {
+			$.get(`http://${DOMAIN_NAME}:8080/api/next`, function (data, status) {
 				console.log('Response:', data);
 				console.log('Status:', status);
 			})
@@ -479,7 +505,7 @@ $( "document" ).ready(function() {
 		}
 		if(keyCode === 111) { //open/close line
 			doThis = false;
-			$.get(`http://${DOMAIN_NAME}:8080/onoff`, function (data, status) {
+			$.get(`http://${DOMAIN_NAME}:8080/api/onoff`, function (data, status) {
 				console.log('Response:', data);
 				console.log('Status:', status);
 			})
@@ -493,7 +519,7 @@ $( "document" ).ready(function() {
 		}
 		if(keyCode === 114) { 
 			doThis = false;
-			$.get(`http://${DOMAIN_NAME}:8080/recall`, function (data, status) {
+			$.get(`http://${DOMAIN_NAME}:8080/api/recall`, function (data, status) {
 				console.log('Response:', data);
 				console.log('Status:', status);
 			})

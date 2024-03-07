@@ -19,7 +19,7 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '../public')));
 
 // Handle incoming HTTP POST & GET requests
-app.post('/send-message', (req, res) => {
+app.post('/api/send-message', (req, res) => {
   const message = req.body;
   if(isLineOpen){
     io.emit('message', message);
@@ -33,12 +33,12 @@ app.post('/send-message', (req, res) => {
 
 });
 
-app.get('/bump', (req, res) => {
+app.get('/api/bump', (req, res) => {
     io.emit('bump', true);
     res.status(200).send('ok');
 });
 
-app.post('/remove-command', (req, res) => {
+app.post('/api/remove-command', (req, res) => {
   const removeCommandNbr = req.body;
   console.log(removeCommandNbr);
   if(Boolean(Object.keys(removeCommandNbr).length)){
@@ -52,7 +52,7 @@ app.post('/remove-command', (req, res) => {
 });
 
 
-app.post('/modify-state', (req, res) => { //TODO CLIENT_SIDE
+app.post('api/modify-state', (req, res) => { //TODO CLIENT_SIDE
   const commandName = req.body.commandName;
   const newState = req.body.newState;
   if(Boolean(Object.keys(commandName).length) && Boolean(Object.keys(newState).length)){
@@ -64,7 +64,7 @@ app.post('/modify-state', (req, res) => { //TODO CLIENT_SIDE
   }
 });
 
-app.post('/cancel-command', (req, res) => {
+app.post('api/cancel-command', (req, res) => {
   const commandName = req.body.commandName;
   if(Boolean(Object.keys(commandName).length)){
     io.emit('cancel-state', commandName);
@@ -76,38 +76,51 @@ app.post('/cancel-command', (req, res) => {
 });
 
 
-app.get('/get-command', (req, res) => {
+app.get('/api/get-command', (req, res) => {
   res.status(200).send(currentOrders);
 });
 
-app.get('/get-command-time', (req, res) => {
+app.get('/api/get-command-time', (req, res) => {
   res.status(200).send(createdAtOrders);
 });
 
-app.get('/onoff', (req, res) => {
+app.get('/api/onoff', (req, res) => {
   io.emit('onoff', isLineOpen);
   res.status(200).send('ok');
 });
 
-app.get('/next', (req, res) => {
+app.get('/api/next', (req, res) => {
   io.emit('next', true);
   res.status(200).send('ok');
 });
 
-app.get('/recall', (req, res) => {
+app.get('/api/recall', (req, res) => {
   io.emit('recall', true);
   res.status(200).send('ok');
 });
 
-app.get('/is-line-open', (req, res) => {
+app.get('/api/is-line-open', (req, res) => {
   res.status(200).send(isLineOpen);
 });
 
-app.get('/reload', (req, res) => {
+app.get('/api/reload', (req, res) => {
   io.emit('reload', true);
   res.status(200).send("ok");
 });
 
+app.post('/api/add-article', (req, res) => { //TODO
+  const commandName = req.body.commandName;
+  const article = req.body.article;
+  let quantity = req.body.quantity;
+  !Boolean(Object.keys(commandName).length)  && (quantity = 1);
+  if(Boolean(Object.keys(commandName).length) && Boolean(Object.keys(article).length) ){
+    io.emit('add-article', commandName + '!' + article);
+    res.status(200).send('ok');
+  }
+  else{
+    res.status(200).send('error');
+  }
+});
 
 
 io.on('connection', (socket) => {
@@ -132,6 +145,6 @@ io.on('connection', (socket) => {
 
 const PORT = 8080;
 
-httpServer.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
+httpServer.listen(PORT,  '0.0.0.0', () => {
+  console.log(`Server listening on port http://${httpServer.address().address}:${PORT}`);
 });
