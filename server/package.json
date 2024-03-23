@@ -18,11 +18,11 @@
   "author": "Daniel MONTEIRO",
   "license": "",
   "dependencies": {
-    "express": "^4.17.1",
     "body-parser": "^1.19.0",
-    "http": "0.0.1-security",
+    "express": "^4.17.1",
     "fs": "0.0.1-security",
+    "http": "0.0.1-security",
     "path": "^0.12.7",
-    "socket.io": "^4.3.2"
+    "socket.io": "^4.7.4"
   }
 }

@@ -160,3 +160,22 @@ body{
 }
 
 
+@keyframes fade {
+    0% { opacity: 1; } /* Opacité maximale */
+    50% { opacity: 0.3; } /* Opacité réduite à mi-chemin */
+    100% { opacity: 1; } /* Retour à l'opacité maximale */
+}
+
+.blinkGradualy {
+    animation: fade 3s infinite; /* Nom de l'animation, durée, itération infinie */
+}
+  
+
+
+
+.text-strikethrough {
+    text-decoration: line-through ;
+    font-style: italic;
+    font-size:2.3em ;
+
+}

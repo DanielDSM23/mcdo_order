@@ -52,7 +52,7 @@ app.post('/api/remove-command', (req, res) => {
 });
 
 
-app.post('api/modify-state', (req, res) => { //TODO CLIENT_SIDE
+app.post('/api/modify-state', (req, res) => { //TODO CLIENT_SIDE
   const commandName = req.body.commandName;
   const newState = req.body.newState;
   if(Boolean(Object.keys(commandName).length) && Boolean(Object.keys(newState).length)){
@@ -64,7 +64,7 @@ app.post('api/modify-state', (req, res) => { //TODO CLIENT_SIDE
   }
 });
 
-app.post('api/cancel-command', (req, res) => {
+app.post('/api/cancel-command', (req, res) => {
   const commandName = req.body.commandName;
   if(Boolean(Object.keys(commandName).length)){
     io.emit('cancel-state', commandName);
@@ -146,5 +146,6 @@ io.on('connection', (socket) => {
 const PORT = 8080;
 
 httpServer.listen(PORT,  '0.0.0.0', () => {
-  console.log(`Server listening on port http://${httpServer.address().address}:${PORT}`);
+  console.log(`Server listening on port http://127.0.0.1:${PORT}`);
 });
+

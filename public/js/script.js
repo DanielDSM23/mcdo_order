@@ -398,7 +398,7 @@ const cancelCommand = (commandName) => {
 
 }
 
-const addArticle = (commandName, article, quantity) => {
+const addArticle = (commandName, article, quantity, displayPlus = false) => {
 	let commandArray = [];
 	let commandArrayQuantity = [];
 	$(`#selected[value="${commandName}"] .order p`).each(function() {
@@ -412,14 +412,44 @@ const addArticle = (commandName, article, quantity) => {
 	if(commandArray.indexOf(article)!=-1){
 		let index = commandArray.indexOf(article);
 		let outQuantity = +commandArrayQuantity[index] + quantity;
-		$(`#selected[value="${commandName}"] .order p:nth-child(${index + 1})`).empty();
-		$(`#selected[value="${commandName}"] .order p:nth-child(${index + 1})`).append(`<img src="svg/add.svg" alt="add" style="width:70px;"/>${outQuantity} ${article}`);
-		$(`#selected[value="${commandName}"] .order p:nth-child(${index + 1})`).css({"display": "flex", 
+		$(` .command[value="${commandName}"] .order p:nth-child(${index + 1})`).empty();
+		let plusImage = displayPlus ? `<img src="svg/add.svg" alt="add" style="width:70px;" class="blinkGradualy"/>` : ``;
+		$(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).append(`${plusImage}${outQuantity} ${article}`);
+		$(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).css({"display": "flex", 
 																					"align-items": "center"});
 	}
 	else{
 		$(`.command[value="${commandName}"] .order`).append(`<p>${quantity} ${article}</p>`);
 	}
+
+}
+
+const removeArticle = (commandName, article, quantity, displayLess = false) => {
+	let commandArray = [];
+	let commandArrayQuantity = [];
+	$(`.command[value="${commandName}"] .order p`).each(function() {
+		var textParts = $(this).text().split(' '); 
+		var quantity = textParts[0]; 
+		var itemName = textParts.slice(1).join(' '); 
+		commandArrayQuantity.push(quantity); 
+		commandArray.push(itemName); 
+	});
+	console.log(commandArray);
+	let index = commandArray.indexOf(article);
+	let outQuantity = +commandArrayQuantity[index] - quantity;
+	if(outQuantity <= 0){
+		outQuantity = 0;
+		$(`.command[value="${commandName}"] .order p:nth-child(${index + 1}) > img`).remove();
+		$(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).addClass('text-strikethrough');
+		displayLess = false;
+		
+	}
+	$(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).empty();
+	let lessImage = displayLess ? `<img src="svg/remove.svg" alt="add" style="width:70px;" class="blinkGradualy"/>` : ``;
+	$(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).append(`${lessImage}${outQuantity} ${article}`);
+	if(displayLess) $(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).css({"display": "flex", 
+																				"align-items": "center"});
+	
 
 }
 
