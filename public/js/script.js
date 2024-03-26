@@ -121,6 +121,24 @@ socket.on("reload", (arg) => {
 	}
 });
 
+socket.on("add-product", (arg) => {
+	if(arg){
+		let commandName = arg.split(",")[0];
+		let article = arg.split(",")[1];
+		let quantity = + arg.split(",")[2];
+		addArticle(commandName, article, quantity); //commandName, article, quantity
+	}
+});
+
+socket.on("remove-product", (arg) => {
+	if(arg){
+		let commandName = arg.split(",")[0];
+		let article = arg.split(",")[1];
+		let quantity = + arg.split(",")[2];
+		removeArticle(commandName, article, quantity); //commandName, article, quantity
+	}
+});
+
 socket.on("cancel-state", (commandName) => {
 	if(commandName){
 		cancelCommand(commandName);
@@ -314,7 +332,7 @@ const addCommand = (jsonArray, timer = 0, state = "Total") => {
 	else{
 		htmlCommand += '<svg viewBox="0 0 164.799 103.699" xmlns="http://www.w3.org/2000/svg" style="height :55px; position:absolute;"><defs></defs><ellipse style="fill: rgb(255, 255, 255); stroke: rgb(0, 0, 0);" cx="82.791" cy="52.129" rx="79.877" ry="45"></ellipse><text style="white-space: pre; fill: black; font-family: Verdana, sans-serif; font-size: 40px;" x="52" y="63.779">CB</text></svg>';
 	}
-	htmlCommand += `<p style="text-align: right; margin-right:10px;">${numberCommand}</p>`;
+	htmlCommand += `<p style="text-align: right; margin-right:10px;">${numberCommand.split(",")[0]}</p>`;
 	//parsing command
 	htmlCommand += `<div class="order">`;
 	for(let i=0; i < jsonArray.order.items.length; i++){
@@ -415,6 +433,7 @@ const addArticle = (commandName, article, quantity, displayPlus = false) => {
 		$(` .command[value="${commandName}"] .order p:nth-child(${index + 1})`).empty();
 		let plusImage = displayPlus ? `<img src="svg/add.svg" alt="add" style="width:70px;" class="blinkGradualy"/>` : ``;
 		$(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).append(`${plusImage}${outQuantity} ${article}`);
+		$(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).removeClass('text-strikethrough');
 		$(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).css({"display": "flex", 
 																					"align-items": "center"});
 	}
@@ -448,7 +467,7 @@ const removeArticle = (commandName, article, quantity, displayLess = false) => {
 	let lessImage = displayLess ? `<img src="svg/remove.svg" alt="add" style="width:70px;" class="blinkGradualy"/>` : ``;
 	$(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).append(`${lessImage}${outQuantity} ${article}`);
 	if(displayLess) $(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).css({"display": "flex", 
-																				"align-items": "center"});
+																								"align-items": "center"});
 	
 
 }

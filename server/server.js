@@ -10,6 +10,8 @@ const app = express();
 const httpServer = http.createServer(app);
 const io = socketIO(httpServer);
 
+
+var numberOrder = 0;
 var isLineOpen = false;
 var currentOrders = [];
 var createdAtOrders = [];
@@ -75,6 +77,32 @@ app.post('/api/cancel-command', (req, res) => {
   }
 });
 
+app.post('/api/add-article', (req, res) => {
+  const commandName = req.body.commandName;
+  const article = req.body.article;
+  const quantity = req.body.quantity
+  if(Boolean(Object.keys(commandName).length)){
+    io.emit('add-product', `${commandName},${article},${quantity}`);
+    res.status(200).send('ok');
+  }
+  else{
+    res.status(200).send('error');
+  }
+});
+
+app.post('/api/remove-article', (req, res) => {
+  const commandName = req.body.commandName;
+  const article = req.body.article;
+  const quantity = req.body.quantity
+  if(Boolean(Object.keys(commandName).length)){
+    io.emit('remove-product', `${commandName},${article},${quantity}`);
+    res.status(200).send('ok');
+  }
+  else{
+    res.status(200).send('error');
+  }
+});
+
 
 app.get('/api/get-command', (req, res) => {
   res.status(200).send(currentOrders);
@@ -106,6 +134,15 @@ app.get('/api/is-line-open', (req, res) => {
 app.get('/api/reload', (req, res) => {
   io.emit('reload', true);
   res.status(200).send("ok");
+});
+
+app.get('/api/get-command-number', (req, res) => {
+  const timestamp = Date.now();
+  numberOrder++;
+  if(numberOrder > 99){
+    numberOrder=1
+  }
+  res.status(200).send(`${numberOrder.toString()},${timestamp}`);
 });
 
 app.post('/api/add-article', (req, res) => { //TODO
