@@ -419,7 +419,7 @@ const cancelCommand = (commandName) => {
 const addArticle = (commandName, article, quantity, displayPlus = false) => {
 	let commandArray = [];
 	let commandArrayQuantity = [];
-	$(`#selected[value="${commandName}"] .order p`).each(function() {
+	$(`.command[value="${commandName}"] .order p`).each(function() {
 		var textParts = $(this).text().split(' '); 
 		var quantity = textParts[0]; 
 		var itemName = textParts.slice(1).join(' '); 
