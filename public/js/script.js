@@ -435,8 +435,11 @@ const addArticle = (commandName, article, quantity, displayPlus = false) => {
 		let outQuantity = +commandArrayQuantity[index] + quantity;
 		$(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).empty();
 		let plusImage = displayPlus ? `<img src="svg/add.svg" alt="add" style="width:70px;" class="blinkGradualy"/>` : ``;
+		if($(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).hasClass('text-strikethrough')){
+			$(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).removeClass('text-strikethrough');
+			outQuantity = quantity;
+		}
 		$(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).append(`${plusImage}${outQuantity} ${article}`);
-		$(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).removeClass('text-strikethrough');
 		$(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).css({"display": "flex", 
 																					"align-items": "center"});
 	}
