@@ -54,53 +54,65 @@ OrderL1 is a server-client system built with Node.js and Socket.IO to manage and
 
 ## Server API Endpoints
 
-1. **`/send-message`**
+1. **`/api/send-message`**
    - *Method:* POST
    - *Description:* Accepts POST requests to send orders to the server.
 
-2. **`/bump`**
+2. **`/api/bump`**
    - *Method:* GET
    - *Description:* Accepts GET requests to bump an order.
 
-3. **`/remove-command`**
+3. **`/api/remove-command`**
    - *Method:* POST
    - *Description:* Accepts POST requests to remove a specific order.
 
-4. **`/modify-state`**
+4. **`/api/modify-state`**
    - *Method:* POST
    - *Description:* Accepts POST requests to modify the state of a command on the client side.
    
-5. **`/cancel-command`**
+5. **`/api/cancel-command`**
    - *Method:* POST
    - *Description:* Accepts POST requests to cancel a specific command.
 
-6. **`/get-command`**
+6. **`/api/get-command`**
    - *Method:* GET
    - *Description:* Accepts GET requests to retrieve the list of current orders.
 
-7. **`/get-command-time`**
+7. **`/api/get-command-time`**
    - *Method:* GET
    - *Description:* Accepts GET requests to retrieve the timestamps of the current orders.
 
-8. **`/onoff`**
+8. **`/api/onoff`**
    - *Method:* GET
    - *Description:* Accepts GET requests to toggle the status of the service line.
 
-9. **`/next`**
+9. **`/api/next`**
    - *Method:* GET
    - *Description:* Accepts GET requests to move to the next order.
 
-10. **`/recall`**
+10. **`/api/recall`**
     - *Method:* GET
     - *Description:* Accepts GET requests to display recall bumped order.
 
-11. **`/is-line-open`**
+11. **`/api/is-line-open`**
     - *Method:* GET
     - *Description:* Accepts GET requests to check if the line is open.
 
-12. **`/reload`**
+12. **`/api/reload`**
     - *Method:* GET
     - *Description:* Accepts GET requests to trigger a reload.
+
+13. **`/api/remove-article`**
+    - *Method:* POST
+    - *Description:* Accepts POST requests to remove a specific article from an order.
+
+14. **`/api/add-article`**
+    - *Method:* POST
+    - *Description:* Accepts POST requests to add a specific article to an order.
+
+15. **`/api/get-command-number`**
+    - *Method:* GET
+    - *Description:* Accepts GET requests to retrieve the order number of the current command.
 
 
 You can use this Postman collection bellow that includes a set of meticulously crafted API requests to streamline and test various functionalities of this application. Use this collection to effortlessly interact with the API, perform tests, and ensure seamless integration. Refer to the provided examples and adapt them to your needs.
