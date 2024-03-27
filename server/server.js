@@ -142,7 +142,7 @@ app.get('/api/get-command-number', (req, res) => {
   if(numberOrder > 99){
     numberOrder=1
   }
-  res.status(200).send(`${numberOrder.toString()},${timestamp}`);
+  res.status(200).send(`${numberOrder.toString().padStart(2, '0')}|${timestamp}`);
 });
 
 app.post('/api/add-article', (req, res) => { //TODO

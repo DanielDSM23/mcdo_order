@@ -329,10 +329,13 @@ const addCommand = (jsonArray, timer = 0, state = "Total") => {
 	if(jsonArray.order.order_number.includes("@@")){
 		htmlCommand += '<svg viewBox="0 0 164.799 103.699" xmlns="http://www.w3.org/2000/svg" style="height :55px; position:absolute;"><defs></defs><ellipse style="fill: rgb(216, 255, 189); stroke: rgb(75, 138, 8);" cx="82.791" cy="52.129" rx="79.877" ry="45"></ellipse><text style="white-space: pre; fill: rgb(75, 138, 8); font-family: Verdana, sans-serif; font-size: 40px;" x="43.161" y="63.779">LAD</text></svg>';
 	}
+	else if(jsonArray.order.order_number.includes("ESP")){
+		htmlCommand += '<svg viewBox="0 0 164.799 103.699" xmlns="http://www.w3.org/2000/svg" style="height :55px; position:absolute;"><defs></defs><ellipse style="fill: rgb(255, 255, 255); stroke: rgb(0, 0, 0);" cx="82.791" cy="52.129" rx="79.877" ry="45"></ellipse><text style="white-space: pre; fill: black; font-family: Verdana, sans-serif; font-size: 40px;" x="45" y="63.779">ESP</text></svg>';
+	}
 	else{
 		htmlCommand += '<svg viewBox="0 0 164.799 103.699" xmlns="http://www.w3.org/2000/svg" style="height :55px; position:absolute;"><defs></defs><ellipse style="fill: rgb(255, 255, 255); stroke: rgb(0, 0, 0);" cx="82.791" cy="52.129" rx="79.877" ry="45"></ellipse><text style="white-space: pre; fill: black; font-family: Verdana, sans-serif; font-size: 40px;" x="52" y="63.779">CB</text></svg>';
 	}
-	htmlCommand += `<p style="text-align: right; margin-right:10px;">${numberCommand.split(",")[0]}</p>`;
+	htmlCommand += `<p style="text-align: right; margin-right:10px;">${numberCommand.split("|")[0]}</p>`;
 	//parsing command
 	htmlCommand += `<div class="order">`;
 	for(let i=0; i < jsonArray.order.items.length; i++){
@@ -355,7 +358,7 @@ const addCommand = (jsonArray, timer = 0, state = "Total") => {
 		$(`.command[value="${numberCommand}"] .order`).css({
 			'display': 'flex',
 			'flex-flow': 'column wrap',
-			'max-height': '50vh'
+			'max-height': 'calc(50vh - 31px - 55px)'
 		});
 	}
 	// pending orders
@@ -430,7 +433,7 @@ const addArticle = (commandName, article, quantity, displayPlus = false) => {
 	if(commandArray.indexOf(article)!=-1){
 		let index = commandArray.indexOf(article);
 		let outQuantity = +commandArrayQuantity[index] + quantity;
-		$(` .command[value="${commandName}"] .order p:nth-child(${index + 1})`).empty();
+		$(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).empty();
 		let plusImage = displayPlus ? `<img src="svg/add.svg" alt="add" style="width:70px;" class="blinkGradualy"/>` : ``;
 		$(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).append(`${plusImage}${outQuantity} ${article}`);
 		$(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).removeClass('text-strikethrough');
@@ -457,7 +460,7 @@ const removeArticle = (commandName, article, quantity, displayLess = false) => {
 	let index = commandArray.indexOf(article);
 	let outQuantity = +commandArrayQuantity[index] - quantity;
 	if(outQuantity <= 0){
-		outQuantity = 0;
+		outQuantity = +commandArrayQuantity[index];
 		$(`.command[value="${commandName}"] .order p:nth-child(${index + 1}) > img`).remove();
 		$(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).addClass('text-strikethrough');
 		displayLess = false;
