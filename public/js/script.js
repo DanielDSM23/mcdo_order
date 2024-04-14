@@ -335,7 +335,7 @@ const addCommand = (jsonArray, timer = 0, state = "Total") => {
 	else{
 		htmlCommand += '<svg viewBox="0 0 164.799 103.699" xmlns="http://www.w3.org/2000/svg" style="height :55px; position:absolute;"><defs></defs><ellipse style="fill: rgb(255, 255, 255); stroke: rgb(0, 0, 0);" cx="82.791" cy="52.129" rx="79.877" ry="45"></ellipse><text style="white-space: pre; fill: black; font-family: Verdana, sans-serif; font-size: 40px;" x="52" y="63.779">CB</text></svg>';
 	}
-	htmlCommand += `<p style="text-align: right; margin-right:10px;">${numberCommand.split("|")[0]}</p>`;
+	htmlCommand += `<p style="text-align: right; margin-right:10px;">${numberCommand.split("|")[0].replace('ESP', '')}</p>`;
 	//parsing command
 	htmlCommand += `<div class="order">`;
 	for(let i=0; i < jsonArray.order.items.length; i++){
