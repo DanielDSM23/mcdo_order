@@ -11,7 +11,8 @@ const httpServer = http.createServer(app);
 const io = socketIO(httpServer);
 
 
-var numberOrder = 0;
+var numberOrderEsp = 0;
+var numberOrderCb = 0;
 var isLineOpen = false;
 var currentOrders = [];
 var createdAtOrders = [];
@@ -136,13 +137,22 @@ app.get('/api/reload', (req, res) => {
   res.status(200).send("ok");
 });
 
-app.get('/api/get-command-number', (req, res) => {
+app.get('/api/get-command-number-esp', (req, res) => {
   const timestamp = Date.now();
-  numberOrder++;
-  if(numberOrder > 99){
-    numberOrder=1
+  numberOrderEsp++;
+  if(numberOrderEsp > 99){
+    numberOrderEsp=1
   }
-  res.status(200).send(`${numberOrder.toString().padStart(2, '0')}|${timestamp}`);
+  res.status(200).send(`${numberOrderEsp.toString().padStart(2, '0')}|${timestamp}`);
+});
+
+app.get('/api/get-command-number-cb', (req, res) => {
+  const timestamp = Date.now();
+  numberOrderCb++;
+  if(numberOrderCb > 99){
+    numberOrderCb=1
+  }
+  res.status(200).send(`${numberOrderCb.toString().padStart(2, '0')}|${timestamp}`);
 });
 
 app.post('/api/add-article', (req, res) => { //TODO
