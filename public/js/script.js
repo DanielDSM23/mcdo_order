@@ -1,3 +1,19 @@
+function htmlspecialchars(str) {
+	if(typeof(str) == 'string'){
+		const map = {
+			'&': '&amp;',
+			'<': '&lt;',
+			'>': '&gt;',
+			'"': '&quot;',
+			"'": '&#039;'
+		};
+		return str.replace(/[&<>"']/g, (m) => map[m]);
+	}
+	else{
+		return str;
+	}
+}
+
 const DOMAIN_NAME = window.location.hostname;
 
 
@@ -18,7 +34,7 @@ const updateStateOfLine = () =>{
 
 let oldOrders = [];
 let oldOrdersTime = [];
-
+let jsonObjectCommands = [];
 
 
 //get actual orders info
@@ -249,6 +265,11 @@ const bump = () => {
 	if(hiddenCommand == 0){
 		$("#pendingOrders").css("visibility", "hidden");
 	}
+	//recover json code and send to the OAT
+	jsonToSend = jsonObjectCommands[orderSelected - 1]
+	jsonObjectCommands.splice(orderSelected - 1, 1);
+	//Send JSON //TODO
+
 	
 	console.log("impression ticket");
 }
@@ -265,7 +286,7 @@ const next = () => {
 		if(idPreviousOrder+1 < previousOrder.length){
 			idPreviousOrder++;
 			$('#recallOrders').empty();
-			$('#recallOrders').append(previousOrder[idPreviousOrder]);
+			$('#recallOrders').push(previousOrder[idPreviousOrder]);
 			$('#recallOrders .timer').empty();
 			let actualDate = new Date();
 			let timerCount = (Math.floor((actualDate - previousOrderDate[idPreviousOrder])/1000)) < 999 ? Math.floor((actualDate - previousOrderDate[idPreviousOrder])/1000) : 999;
@@ -322,8 +343,9 @@ const recall = (orderToDisplay = null) => {
 }
 
 const addCommand = (jsonArray, timer = 0, state = "Total") => {
+	jsonObjectCommands.push(jsonArray);
 	//formattedTime = new Date().toLocaleTimeString('fr-FR', { hour12: false });
-	numberCommand = `${jsonArray.order.order_number}`;
+	numberCommand = `${htmlspecialchars(jsonArray.order.order_number)}`;
 	//checking if order is LAD
 	htmlCommand = `<div class="command" value="${numberCommand}">`;
 	if(jsonArray.order.order_number.includes("@@")){
@@ -335,21 +357,33 @@ const addCommand = (jsonArray, timer = 0, state = "Total") => {
 	else{
 		htmlCommand += '<svg viewBox="0 0 164.799 103.699" xmlns="http://www.w3.org/2000/svg" style="height :55px; position:absolute;"><defs></defs><ellipse style="fill: rgb(255, 255, 255); stroke: rgb(0, 0, 0);" cx="82.791" cy="52.129" rx="79.877" ry="45"></ellipse><text style="white-space: pre; fill: black; font-family: Verdana, sans-serif; font-size: 40px;" x="52" y="63.779">CB</text></svg>';
 	}
-	htmlCommand += `<p style="text-align: right; margin-right:10px;">${numberCommand.split("|")[0].replace('ESP', '')}</p>`;
+	htmlCommand += `<p style="text-align: right; margin-right:10px;">${htmlspecialchars(numberCommand.split("|")[0].replace('ESP', ''))}</p>`;
 	//parsing command
 	htmlCommand += `<div class="order">`;
 	for(let i=0; i < jsonArray.order.items.length; i++){
 		if(jsonArray.order.items[i].category == "Kitchen"){
-			htmlCommand += `<p>${jsonArray.order.items[i].quantity} ${jsonArray.order.items[i].item_name}</p>`;
+			htmlCommand += `<p class="kitchen">${htmlspecialchars(jsonArray.order.items[i].quantity)} ${htmlspecialchars(jsonArray.order.items[i].item_name)}</p>`;
 			for(let k=0; k < jsonArray.order.items[i].addons.length; k++){
-				htmlCommand+=`<p class="indent"> <img src="svg/with.svg" style="width:75px;"/>    ${jsonArray.order.items[i].addons[k]}</p>`;
+				htmlCommand+=`<p class="indent"> <img src="svg/with.svg" style="width:75px;"/>    ${htmlspecialchars(jsonArray.order.items[i].addons[k])}</p>`;
 			}
 			for(let k=0; k < jsonArray.order.items[i].remove.length; k++){
-				htmlCommand+=`<p class="indent"> <img src="svg/without.svg" style="width:75px;"/>    ${jsonArray.order.items[i].remove[k]}</p>`;
+				htmlCommand+=`<p class="indent"> <img src="svg/without.svg" style="width:75px;"/>    ${htmlspecialchars(jsonArray.order.items[i].remove[k])}</p>`;
 			}
 		}
+		else if(jsonArray.order.items[i].category == "Beverage"){
+				htmlCommand += `<p class="beverage">${htmlspecialchars(jsonArray.order.items[i].quantity)} ${htmlspecialchars(jsonArray.order.items[i].item_name)}</p>`;
+				for(let k=0; k < jsonArray.order.items[i].remove.length; k++){
+					htmlCommand+=`<p class="indent"> <img src="svg/without.svg" style="width:75px;"/>    ${htmlspecialchars(jsonArray.order.items[i].remove[k])}</p>`;
+				}
+		}
+		else if(jsonArray.order.items[i].category == "OAT"){
+				htmlCommand += `<p class="oat">${htmlspecialchars(jsonArray.order.items[i].quantity)} ${htmlspecialchars(jsonArray.order.items[i].item_name)}</p>`;
+				for(let k=0; k < jsonArray.order.items[i].remove.length; k++){
+					htmlCommand+=`<p class="indent"> <img src="svg/without.svg" style="width:75px;"/>    ${htmlspecialchars(jsonArray.order.items[i].remove[k])}</p>`;
+				}
+		}
 	}
-	htmlCommand += `</div><div class="bottom"><p style="margin :0px 5px;" class="state">${state}<p class="timer" style="text-align: right; margin-top: -55px; margin-right: 10px;">${timer}</p></p> </div></div>`;
+	htmlCommand += `</div><div class="bottom"><p style="margin :0px 5px;" class="state">${htmlspecialchars(state)}<p class="timer" style="text-align: right; margin-top: -55px; margin-right: 10px;">${htmlspecialchars(timer)}</p></p> </div></div>`;
 	
 	$("#actualOrders").append(htmlCommand);
 	// resizing when too large 
