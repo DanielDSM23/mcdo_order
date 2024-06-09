@@ -14,13 +14,17 @@ function htmlspecialchars(str) {
 	}
 }
 
+
+
+
 const DOMAIN_NAME = window.location.hostname;
 
+const PORT = location.port;
 
 const HALF_SCREEN_WIDTH = window.innerHeight / 2;
 
 const updateStateOfLine = () =>{
-	$.get(`http://${DOMAIN_NAME}:8080/api/is-line-open`, function (data, status) {
+	$.get(`http://${DOMAIN_NAME}:${PORT}/api/is-line-open`, function (data, status) {
 	isLineOpen = data;
 	onOff(isLineOpen);
 	})
@@ -40,9 +44,9 @@ let jsonObjectCommands = [];
 //get actual orders info
 
 
-$.get(`http://${DOMAIN_NAME}:8080/api/get-command`, function (ordersData, status) {
+$.get(`http://${DOMAIN_NAME}:${PORT}/api/get-command`, function (ordersData, status) {
 	oldOrders = ordersData;
-	$.get(`http://${DOMAIN_NAME}:8080/api/get-command-time`, function (ordersTimeData, status) {
+	$.get(`http://${DOMAIN_NAME}:${PORT}/api/get-command-time`, function (ordersTimeData, status) {
 		oldOrdersTime = ordersTimeData;
 		for(let i = 0; i<oldOrdersTime.length; i++){
 			let timerCount = Math.round(Math.abs((new Date().getTime() - new Date(oldOrdersTime[i]).getTime()) / 1000));
@@ -80,7 +84,7 @@ updateStateOfLine();
 let hasBeenDisconnected = false; // TODO : if socket reconnected after cdisconnection reload.
 let doThis = true;
 
-const socket = io(`http://${DOMAIN_NAME}:8080`); 
+const socket = io(`http://${DOMAIN_NAME}:${PORT}`); 
 
 socket.on('message', (data) => {
 	console.log('message event', data);
@@ -381,34 +385,41 @@ const addCommand = (jsonArray, timer = 0, state = "Total") => {
 				$tempParsingHtml.find('.kitchen').append(`<p class="indent"> <img src="svg/without.svg" style="width:75px;"/>    ${htmlspecialchars(jsonArray.order.items[i].remove[k])}</p>`);
 			}
 		}
-		else if(jsonArray.order.items[i].category == "Beverage"){
-			
-			$tempParsingHtml.find('.beverage').append(`<p>${htmlspecialchars(jsonArray.order.items[i].quantity)} ${htmlspecialchars(jsonArray.order.items[i].item_name)}</p>`);
-				for(let k=0; k < jsonArray.order.items[i].remove.length; k++){
-					$tempParsingHtml.find('.beverage').append(`<p class="indent"> <img src="svg/without.svg" style="width:75px;"/>    ${htmlspecialchars(jsonArray.order.items[i].remove[k])}</p>`);
+		if(PORT != 8080){
+			if(PORT > 8081){
+				if(jsonArray.order.items[i].category == "Fries"){
 					
+					$tempParsingHtml.find('.fries').append(`<p>${htmlspecialchars(jsonArray.order.items[i].quantity)} ${htmlspecialchars(jsonArray.order.items[i].item_name)}</p>`);
+					for(let k=0; k < jsonArray.order.items[i].remove.length; k++){
+						$tempParsingHtml.find('.fries').append(`<p class="indent"> <img src="svg/without.svg" style="width:75px;"/>    ${htmlspecialchars(jsonArray.order.items[i].remove[k])}</p>`);
+						
+					}
 				}
-		}
-		else if(jsonArray.order.items[i].category == "Fries"){
+				if(jsonArray.order.items[i].category == "Sauce"){
 				
-				$tempParsingHtml.find('.fries').append(`<p>${htmlspecialchars(jsonArray.order.items[i].quantity)} ${htmlspecialchars(jsonArray.order.items[i].item_name)}</p>`);
-				for(let k=0; k < jsonArray.order.items[i].remove.length; k++){
-					$tempParsingHtml.find('.fries').append(`<p class="indent"> <img src="svg/without.svg" style="width:75px;"/>    ${htmlspecialchars(jsonArray.order.items[i].remove[k])}</p>`);
-					
+					$tempParsingHtml.find('.sauce').append(`<p>${htmlspecialchars(jsonArray.order.items[i].quantity)} ${htmlspecialchars(jsonArray.order.items[i].item_name)}</p>`);
 				}
-		}
-		else if(jsonArray.order.items[i].category == "Dessert"){
-			
-			$tempParsingHtml.find('.dessert').append(`<p>${htmlspecialchars(jsonArray.order.items[i].quantity)} ${htmlspecialchars(jsonArray.order.items[i].item_name)}</p>`);
-			for(let k=0; k < jsonArray.order.items[i].remove.length; k++){
-				$tempParsingHtml.find('.dessert').append(`<p class="indent"> <img src="svg/without.svg" style="width:75px;"/>    ${htmlspecialchars(jsonArray.order.items[i].remove[k])}</p>`);
-				
 			}
-		}
-
-		else if(jsonArray.order.items[i].category == "Sauce"){
+			if(PORT == 8081 || PORT == 8083){
+				if(jsonArray.order.items[i].category == "Beverage"){
+					
+					$tempParsingHtml.find('.beverage').append(`<p>${htmlspecialchars(jsonArray.order.items[i].quantity)} ${htmlspecialchars(jsonArray.order.items[i].item_name)}</p>`);
+						for(let k=0; k < jsonArray.order.items[i].remove.length; k++){
+							$tempParsingHtml.find('.beverage').append(`<p class="indent"> <img src="svg/without.svg" style="width:75px;"/>    ${htmlspecialchars(jsonArray.order.items[i].remove[k])}</p>`);
+							
+						}
+				}
+				if(jsonArray.order.items[i].category == "Dessert"){
+					
+					$tempParsingHtml.find('.dessert').append(`<p>${htmlspecialchars(jsonArray.order.items[i].quantity)} ${htmlspecialchars(jsonArray.order.items[i].item_name)}</p>`);
+					for(let k=0; k < jsonArray.order.items[i].remove.length; k++){
+						$tempParsingHtml.find('.dessert').append(`<p class="indent"> <img src="svg/without.svg" style="width:75px;"/>    ${htmlspecialchars(jsonArray.order.items[i].remove[k])}</p>`);
+						
+					}
+				}
+			}
+	
 			
-			$tempParsingHtml.find('.sauce').append(`<p>${htmlspecialchars(jsonArray.order.items[i].quantity)} ${htmlspecialchars(jsonArray.order.items[i].item_name)}</p>`);
 		}
 	}
 	htmlCommand += $tempParsingHtml.html();
@@ -551,7 +562,16 @@ const removeArticle = (commandName, article, quantity, displayLess = false) => {
 
 }
 
+const defineNameLine = () => {
+	const arrayNameLines = ["Kitchen", "Beverage", "OAT", "Verif"];
+	$('title').text(arrayNameLines[PORT - 8080]);
+	$('#line').contents().filter(function() {
+		return this.nodeType === 3; // Node type 3 is a text node
+	  }).first().replaceWith(arrayNameLines[PORT - 8080]);
+}
+
 $( "document" ).ready(function() {
+	defineNameLine();
 	onOff(isLineOpen);
 	//readTextFile();
     var x = setInterval(function() { 
@@ -590,22 +610,20 @@ $( "document" ).ready(function() {
 		if(keyCode === 13) { 
 			doThis = false;
 			$.ajax({
-				url: `http://${DOMAIN_NAME}:8080/api/remove-command`,
-				type: 'POST', // or 'DELETE' depending on your API endpoint
+				url: `http://${DOMAIN_NAME}:${PORT}/api/remove-command`,
+				type: 'POST', 
 				contentType: 'application/json',
 				data: JSON.stringify({
 					"number": orderSelected
 				}),
 				success: function(response) {
-					// Handle success response here
 					console.log(response);
 				},
 				error: function(error) {
-					// Handle error here
 					console.error(error);
 				}
 			});			
-			$.get(`http://${DOMAIN_NAME}:8080/api/bump`, function (data, status) {
+			$.get(`http://${DOMAIN_NAME}:${PORT}/api/bump`, function (data, status) {
 				console.log('Response:', data);
 				console.log('Status:', status);
 			})
@@ -619,7 +637,7 @@ $( "document" ).ready(function() {
 		}
 		if(keyCode === 110) { 
 			doThis = false;
-			$.get(`http://${DOMAIN_NAME}:8080/api/next`, function (data, status) {
+			$.get(`http://${DOMAIN_NAME}:${PORT}/api/next`, function (data, status) {
 				console.log('Response:', data);
 				console.log('Status:', status);
 			})
@@ -633,7 +651,7 @@ $( "document" ).ready(function() {
 		}
 		if(keyCode === 111) { //open/close line
 			doThis = false;
-			$.get(`http://${DOMAIN_NAME}:8080/api/onoff`, function (data, status) {
+			$.get(`http://${DOMAIN_NAME}:${PORT}/api/onoff`, function (data, status) {
 				console.log('Response:', data);
 				console.log('Status:', status);
 			})
@@ -647,7 +665,7 @@ $( "document" ).ready(function() {
 		}
 		if(keyCode === 114) { 
 			doThis = false;
-			$.get(`http://${DOMAIN_NAME}:8080/api/recall`, function (data, status) {
+			$.get(`http://${DOMAIN_NAME}:${PORT}/api/recall`, function (data, status) {
 				console.log('Response:', data);
 				console.log('Status:', status);
 			})

@@ -5,6 +5,10 @@ body{
 	background-color: black;
     overflow-y: hidden;
     overflow-x: hidden;
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none;    /* Firefox */
+    -ms-user-select: none;     /* Internet Explorer/Edge */
+    user-select: none;         /* Standard syntax */
 	
 }
 
@@ -190,6 +194,7 @@ body{
     margin-top: 4px;
     border-top: solid 4px yellow;
     border-right: solid 20px yellow;
+    display: none;
 }
 
 .beverage:has(p){
@@ -212,4 +217,38 @@ body{
     border-top: solid 4px black;
     border-right: solid 20px black;
 
+}
+
+
+.buttons-layout{
+    width: 100%;
+    position: absolute;
+    bottom: 36.5px;
+    display: flex;
+    gap: 20px;
+    flex-direction: row;
+    align-content: center;
+    align-items: center;
+    justify-content: space-evenly;
+    flex-wrap: nowrap;
+}
+
+.button{
+    background-color: #5232a7;
+    width : 142px;
+    height: 32px;
+    transition: background-color 200ms;
+
+    p{
+        font-size: 15pt;
+        color: white;
+        text-align: center;
+        margin:4.5px;
+        text-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    }
+}
+
+.button:active{
+    background-color: #804cff;
+    transition: background-color 200ms;
 }
