@@ -358,31 +358,60 @@ const addCommand = (jsonArray, timer = 0, state = "Total") => {
 		htmlCommand += '<svg viewBox="0 0 164.799 103.699" xmlns="http://www.w3.org/2000/svg" style="height :55px; position:absolute;"><defs></defs><ellipse style="fill: rgb(255, 255, 255); stroke: rgb(0, 0, 0);" cx="82.791" cy="52.129" rx="79.877" ry="45"></ellipse><text style="white-space: pre; fill: black; font-family: Verdana, sans-serif; font-size: 40px;" x="52" y="63.779">CB</text></svg>';
 	}
 	htmlCommand += `<p style="text-align: right; margin-right:10px;">${htmlspecialchars(numberCommand.split("|")[0].replace('ESP', ''))}</p>`;
-	//parsing command
 	htmlCommand += `<div class="order">`;
+	//making divs for parsing
+	let parsingHtml = `<div class="kitchen"></div>`; //red
+	parsingHtml += `<div class="beverage"></div>`; //green
+	parsingHtml += `<div class="fries"></div>`; //yellow
+	parsingHtml += `<div class="dessert"></div>`; //blue
+	parsingHtml += `<div class="sauce"></div>`; //blue
+
+	let $tempParsingHtml = $('<div>').html(parsingHtml);
+	//parsing command
 	for(let i=0; i < jsonArray.order.items.length; i++){
 		if(jsonArray.order.items[i].category == "Kitchen"){
-			htmlCommand += `<p class="kitchen">${htmlspecialchars(jsonArray.order.items[i].quantity)} ${htmlspecialchars(jsonArray.order.items[i].item_name)}</p>`;
+			$tempParsingHtml.find('.kitchen').append(`<p>${htmlspecialchars(jsonArray.order.items[i].quantity)} ${htmlspecialchars(jsonArray.order.items[i].item_name)}</p>`);
+			
 			for(let k=0; k < jsonArray.order.items[i].addons.length; k++){
-				htmlCommand+=`<p class="indent"> <img src="svg/with.svg" style="width:75px;"/>    ${htmlspecialchars(jsonArray.order.items[i].addons[k])}</p>`;
+				
+				$tempParsingHtml.find('.kitchen').append(`<p class="indent"> <img src="svg/with.svg" style="width:75px;"/>    ${htmlspecialchars(jsonArray.order.items[i].addons[k])}</p>`);
 			}
 			for(let k=0; k < jsonArray.order.items[i].remove.length; k++){
-				htmlCommand+=`<p class="indent"> <img src="svg/without.svg" style="width:75px;"/>    ${htmlspecialchars(jsonArray.order.items[i].remove[k])}</p>`;
+				
+				$tempParsingHtml.find('.kitchen').append(`<p class="indent"> <img src="svg/without.svg" style="width:75px;"/>    ${htmlspecialchars(jsonArray.order.items[i].remove[k])}</p>`);
 			}
 		}
 		else if(jsonArray.order.items[i].category == "Beverage"){
-				htmlCommand += `<p class="beverage">${htmlspecialchars(jsonArray.order.items[i].quantity)} ${htmlspecialchars(jsonArray.order.items[i].item_name)}</p>`;
+			
+			$tempParsingHtml.find('.beverage').append(`<p>${htmlspecialchars(jsonArray.order.items[i].quantity)} ${htmlspecialchars(jsonArray.order.items[i].item_name)}</p>`);
 				for(let k=0; k < jsonArray.order.items[i].remove.length; k++){
-					htmlCommand+=`<p class="indent"> <img src="svg/without.svg" style="width:75px;"/>    ${htmlspecialchars(jsonArray.order.items[i].remove[k])}</p>`;
+					$tempParsingHtml.find('.beverage').append(`<p class="indent"> <img src="svg/without.svg" style="width:75px;"/>    ${htmlspecialchars(jsonArray.order.items[i].remove[k])}</p>`);
+					
 				}
 		}
-		else if(jsonArray.order.items[i].category == "OAT"){
-				htmlCommand += `<p class="oat">${htmlspecialchars(jsonArray.order.items[i].quantity)} ${htmlspecialchars(jsonArray.order.items[i].item_name)}</p>`;
+		else if(jsonArray.order.items[i].category == "Fries"){
+				
+				$tempParsingHtml.find('.fries').append(`<p>${htmlspecialchars(jsonArray.order.items[i].quantity)} ${htmlspecialchars(jsonArray.order.items[i].item_name)}</p>`);
 				for(let k=0; k < jsonArray.order.items[i].remove.length; k++){
-					htmlCommand+=`<p class="indent"> <img src="svg/without.svg" style="width:75px;"/>    ${htmlspecialchars(jsonArray.order.items[i].remove[k])}</p>`;
+					$tempParsingHtml.find('.fries').append(`<p class="indent"> <img src="svg/without.svg" style="width:75px;"/>    ${htmlspecialchars(jsonArray.order.items[i].remove[k])}</p>`);
+					
 				}
+		}
+		else if(jsonArray.order.items[i].category == "Dessert"){
+			
+			$tempParsingHtml.find('.dessert').append(`<p>${htmlspecialchars(jsonArray.order.items[i].quantity)} ${htmlspecialchars(jsonArray.order.items[i].item_name)}</p>`);
+			for(let k=0; k < jsonArray.order.items[i].remove.length; k++){
+				$tempParsingHtml.find('.dessert').append(`<p class="indent"> <img src="svg/without.svg" style="width:75px;"/>    ${htmlspecialchars(jsonArray.order.items[i].remove[k])}</p>`);
+				
+			}
+		}
+
+		else if(jsonArray.order.items[i].category == "Sauce"){
+			
+			$tempParsingHtml.find('.sauce').append(`<p>${htmlspecialchars(jsonArray.order.items[i].quantity)} ${htmlspecialchars(jsonArray.order.items[i].item_name)}</p>`);
 		}
 	}
+	htmlCommand += $tempParsingHtml.html();
 	htmlCommand += `</div><div class="bottom"><p style="margin :0px 5px;" class="state">${htmlspecialchars(state)}<p class="timer" style="text-align: right; margin-top: -55px; margin-right: 10px;">${htmlspecialchars(timer)}</p></p> </div></div>`;
 	
 	$("#actualOrders").append(htmlCommand);
@@ -394,7 +423,17 @@ const addCommand = (jsonArray, timer = 0, state = "Total") => {
 			'flex-flow': 'column wrap',
 			'max-height': 'calc(50vh - 31px - 55px)'
 		});
+
+		$(`.command[value="${numberCommand}"] .kitchen, .command[value="${numberCommand}"] .fries, .command[value="${numberCommand}"] .beverage, .command[value="${numberCommand}"] .dessert, .command[value="${numberCommand}"] .sauce`).each(function() {
+			$(this).css({
+				'display': 'flex',
+				'flex-flow': 'column wrap',
+				'max-height': 'calc(50vh - 31px - 55px)'
+			});
+		});
+		
 	}
+
 	// pending orders
 	if(isCommandTouchingBottom()){
 		$("div.command:last-of-type").addClass("hidden");

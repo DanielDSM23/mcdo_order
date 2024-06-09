@@ -149,8 +149,7 @@ body{
 }
 
 .indent{
-    text-indent: 10%;
-    width: 40%;
+    text-indent: 35px;
 }
 
 @keyframes blink-animation {
@@ -180,10 +179,37 @@ body{
 
 }
 
-.oat{
-    display:none;
+
+.kitchen:has(p){
+    margin-top: 4px;
+    border-top: solid 4px red;
+    border-right: solid 20px red;
 }
 
-.beverage{
-    display: none ;
+.fries:has(p){
+    margin-top: 4px;
+    border-top: solid 4px yellow;
+    border-right: solid 20px yellow;
+}
+
+.beverage:has(p){
+    margin-top: 4px;
+    border-top: solid 4px green;
+    border-right: solid 20px green;
+}
+
+
+.dessert:has(p){
+    margin-top: 4px;
+    border-top: solid 4px cyan;
+    border-right: solid 20px cyan;
+
+}
+
+
+.sauce:has(p){
+    margin-top: 4px;
+    border-top: solid 4px black;
+    border-right: solid 20px black;
+
 }
