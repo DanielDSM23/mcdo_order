@@ -373,16 +373,18 @@ const addCommand = (jsonArray, timer = 0, state = "Total") => {
 	let $tempParsingHtml = $('<div>').html(parsingHtml);
 	//parsing command
 	for(let i=0; i < jsonArray.order.items.length; i++){
-		if(jsonArray.order.items[i].category == "Kitchen"){
-			$tempParsingHtml.find('.kitchen').append(`<p>${htmlspecialchars(jsonArray.order.items[i].quantity)} ${htmlspecialchars(jsonArray.order.items[i].item_name)}</p>`);
-			
-			for(let k=0; k < jsonArray.order.items[i].addons.length; k++){
+		if(PORT != 8081){
+			if(jsonArray.order.items[i].category == "Kitchen"){
+				$tempParsingHtml.find('.kitchen').append(`<p>${htmlspecialchars(jsonArray.order.items[i].quantity)} ${htmlspecialchars(jsonArray.order.items[i].item_name)}</p>`);
 				
-				$tempParsingHtml.find('.kitchen').append(`<p class="indent"> <img src="svg/with.svg" style="width:75px;"/>    ${htmlspecialchars(jsonArray.order.items[i].addons[k])}</p>`);
-			}
-			for(let k=0; k < jsonArray.order.items[i].remove.length; k++){
-				
-				$tempParsingHtml.find('.kitchen').append(`<p class="indent"> <img src="svg/without.svg" style="width:75px;"/>    ${htmlspecialchars(jsonArray.order.items[i].remove[k])}</p>`);
+				for(let k=0; k < jsonArray.order.items[i].addons.length; k++){
+					
+					$tempParsingHtml.find('.kitchen').append(`<p class="indent"> <img src="svg/with.svg" style="width:75px;"/>    ${htmlspecialchars(jsonArray.order.items[i].addons[k])}</p>`);
+				}
+				for(let k=0; k < jsonArray.order.items[i].remove.length; k++){
+					
+					$tempParsingHtml.find('.kitchen').append(`<p class="indent"> <img src="svg/without.svg" style="width:75px;"/>    ${htmlspecialchars(jsonArray.order.items[i].remove[k])}</p>`);
+				}
 			}
 		}
 		if(PORT != 8080){
@@ -571,6 +573,11 @@ const defineNameLine = () => {
 }
 
 $( "document" ).ready(function() {
+	if(PORT == 8080){
+		$(".buttons-layout").css({
+			"display":"none"
+		})
+	}
 	defineNameLine();
 	onOff(isLineOpen);
 	//readTextFile();
