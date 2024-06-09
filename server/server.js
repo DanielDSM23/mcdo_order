@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const http = require('http');
 const path = require('path');
 const socketIO = require('socket.io');
+const cors = require('cors');
 
 const createServer = (port, name) => {
   const app = express();
@@ -15,6 +16,7 @@ const createServer = (port, name) => {
   var currentOrders = [];
   var createdAtOrders = [];
   
+  app.use(cors());
   app.use(bodyParser.json());
   app.use(express.static(path.join(__dirname, '../public')));
 

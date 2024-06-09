@@ -81,7 +81,7 @@ let idPreviousOrder = 0;
 let hiddenCommand = 0;
 let isLineOpen = null;
 updateStateOfLine();
-let hasBeenDisconnected = false; // TODO : if socket reconnected after cdisconnection reload.
+let hasBeenDisconnected = false; 
 let doThis = true;
 
 const socket = io(`http://${DOMAIN_NAME}:${PORT}`); 
@@ -234,6 +234,16 @@ function isCommandTouchingBottom() {
 }
 
 
+const nextPort = () =>{
+	if(PORT == 8080){
+		return 8082;
+	}
+	else if(PORT == 8082){
+		return 8083;
+	}
+
+}
+
 
 const bump = () => {
 	socket.emit("bump", true);
@@ -272,8 +282,21 @@ const bump = () => {
 	//recover json code and send to the OAT
 	jsonToSend = jsonObjectCommands[orderSelected - 1]
 	jsonObjectCommands.splice(orderSelected - 1, 1);
+	
 	//Send JSON //TODO
-
+	var settings = {
+		"url": `http://localhost:${nextPort()}/api/send-message`,
+		"method": "POST",
+		"timeout": 0,
+		"headers": {
+		  "Content-Type": "application/json"
+		},
+		"data": JSON.stringify(jsonToSend),
+	  };
+	  
+	  $.ajax(settings).done(function (response) {
+		console.log(response);
+	  });
 	
 	console.log("impression ticket");
 }
@@ -362,7 +385,7 @@ const addCommand = (jsonArray, timer = 0, state = "Total") => {
 		htmlCommand += '<svg viewBox="0 0 164.799 103.699" xmlns="http://www.w3.org/2000/svg" style="height :55px; position:absolute;"><defs></defs><ellipse style="fill: rgb(255, 255, 255); stroke: rgb(0, 0, 0);" cx="82.791" cy="52.129" rx="79.877" ry="45"></ellipse><text style="white-space: pre; fill: black; font-family: Verdana, sans-serif; font-size: 40px;" x="52" y="63.779">CB</text></svg>';
 	}
 	htmlCommand += `<p style="text-align: right; margin-right:10px;">${htmlspecialchars(numberCommand.split("|")[0].replace('ESP', ''))}</p>`;
-	htmlCommand += `<div class="order">`;
+	htmlCommand += `<div class="order" >`;
 	//making divs for parsing
 	let parsingHtml = `<div class="kitchen"></div>`; //red
 	parsingHtml += `<div class="beverage"></div>`; //green
