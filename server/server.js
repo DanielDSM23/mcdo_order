@@ -73,8 +73,9 @@ const createServer = (port, name) => {
       const commandName = req.body.commandName;
       const article = req.body.article;
       const quantity = req.body.quantity;
+      const category = req.body.category;
       if(Boolean(Object.keys(commandName).length)){
-        ioInstance.emit('add-product', `${commandName},${article},${quantity}`);
+        ioInstance.emit('add-product', `${commandName},${article},${quantity},${category}`);
         res.status(200).send('ok');
       } else {
         res.status(200).send('error');

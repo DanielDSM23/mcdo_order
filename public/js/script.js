@@ -146,7 +146,8 @@ socket.on("add-product", (arg) => {
 		let commandName = arg.split(",")[0];
 		let article = arg.split(",")[1];
 		let quantity = + arg.split(",")[2];
-		addArticle(commandName, article, quantity); //commandName, article, quantity
+		let category = arg.split(",")[3];
+		addArticle(commandName, article, quantity, false, category); //commandName, article, quantity
 	}
 });
 
@@ -397,7 +398,7 @@ const addCommand = (jsonArray, timer = 0, state = "Total") => {
 	//parsing command
 	for(let i=0; i < jsonArray.order.items.length; i++){
 		if(PORT != 8081){
-			if(jsonArray.order.items[i].category == "Kitchen"){
+			if(jsonArray.order.items[i].category == "kitchen"){
 				$tempParsingHtml.find('.kitchen').append(`<p>${htmlspecialchars(jsonArray.order.items[i].quantity)} ${htmlspecialchars(jsonArray.order.items[i].item_name)}</p>`);
 				
 				for(let k=0; k < jsonArray.order.items[i].addons.length; k++){
@@ -412,7 +413,7 @@ const addCommand = (jsonArray, timer = 0, state = "Total") => {
 		}
 		if(PORT != 8080){
 			if(PORT > 8081){
-				if(jsonArray.order.items[i].category == "Fries"){
+				if(jsonArray.order.items[i].category == "fries"){
 					
 					$tempParsingHtml.find('.fries').append(`<p>${htmlspecialchars(jsonArray.order.items[i].quantity)} ${htmlspecialchars(jsonArray.order.items[i].item_name)}</p>`);
 					for(let k=0; k < jsonArray.order.items[i].remove.length; k++){
@@ -420,13 +421,13 @@ const addCommand = (jsonArray, timer = 0, state = "Total") => {
 						
 					}
 				}
-				if(jsonArray.order.items[i].category == "Sauce"){
+				if(jsonArray.order.items[i].category == "sauce"){
 				
 					$tempParsingHtml.find('.sauce').append(`<p>${htmlspecialchars(jsonArray.order.items[i].quantity)} ${htmlspecialchars(jsonArray.order.items[i].item_name)}</p>`);
 				}
 			}
 			if(PORT == 8081 || PORT == 8083){
-				if(jsonArray.order.items[i].category == "Beverage"){
+				if(jsonArray.order.items[i].category == "beverage"){
 					
 					$tempParsingHtml.find('.beverage').append(`<p>${htmlspecialchars(jsonArray.order.items[i].quantity)} ${htmlspecialchars(jsonArray.order.items[i].item_name)}</p>`);
 						for(let k=0; k < jsonArray.order.items[i].remove.length; k++){
@@ -434,7 +435,7 @@ const addCommand = (jsonArray, timer = 0, state = "Total") => {
 							
 						}
 				}
-				if(jsonArray.order.items[i].category == "Dessert"){
+				if(jsonArray.order.items[i].category == "dessert"){
 					
 					$tempParsingHtml.find('.dessert').append(`<p>${htmlspecialchars(jsonArray.order.items[i].quantity)} ${htmlspecialchars(jsonArray.order.items[i].item_name)}</p>`);
 					for(let k=0; k < jsonArray.order.items[i].remove.length; k++){
@@ -528,9 +529,26 @@ const cancelCommand = (commandName) => {
 
 }
 
-const addArticle = (commandName, article, quantity, displayPlus = false) => {
+const addArticle = (commandName, article, quantity, displayPlus = false, category) => {
 	let commandArray = [];
 	let commandArrayQuantity = [];
+	if($(`.command[value="${commandName}"]`).length == 0 && PORT == 8081){ //add when beverage
+		const orderData = {
+			order: {
+			  order_number: commandName,
+			  items: [
+				{
+				  item_name: article,
+				  quantity: quantity,
+				  addons: [],
+				  remove: [],
+				  category: category
+				}
+			  ]
+			}
+		  };
+		addCommand(orderData);
+	}
 	$(`.command[value="${commandName}"] .order p`).each(function() {
 		var textParts = $(this).text().split(' '); 
 		var quantity = textParts[0]; 
@@ -548,12 +566,13 @@ const addArticle = (commandName, article, quantity, displayPlus = false) => {
 			$(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).removeClass('text-strikethrough');
 			outQuantity = quantity;
 		}
-		$(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).append(`${plusImage}${outQuantity} ${article}`);
+		$(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).append(`${htmlspecialchars(plusImage)}${htmlspecialchars(outQuantity)} ${htmlspecialchars(article)}`);
 		$(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).css({"display": "flex", 
 																					"align-items": "center"});
 	}
 	else{
-		$(`.command[value="${commandName}"] .order`).append(`<p>${quantity} ${article}</p>`);
+		console.log(`.command[value="${commandName}"] .order .${category}`);
+		$(`.command[value="${commandName}"] .order .${category}`).append(`<p>${htmlspecialchars(quantity)} ${htmlspecialchars(article)}</p>`);
 	}
 
 }
