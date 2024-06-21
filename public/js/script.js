@@ -156,7 +156,8 @@ socket.on("remove-product", (arg) => {
 		let commandName = arg.split(",")[0];
 		let article = arg.split(",")[1];
 		let quantity = + arg.split(",")[2];
-		removeArticle(commandName, article, quantity); //commandName, article, quantity
+		let category = arg.split(",")[3];
+		removeArticle(commandName, article, quantity, false, category); //commandName, article, quantity
 	}
 });
 
@@ -276,7 +277,7 @@ const bump = () => {
 	$(`.command.hidden:first`).removeClass("hidden");
 	hiddenCommand > 0 && hiddenCommand--;
 	$("#pendingOrders").empty();
-	$("#pendingOrders").append(`${hiddenCommand} More Pending Orders >>`);
+	$("#pendingOrders").append(`${htmlspecialchars(hiddenCommand)} More Pending Orders >>`);
 	if(hiddenCommand == 0){
 		$("#pendingOrders").css("visibility", "hidden");
 	}
@@ -318,7 +319,7 @@ const next = () => {
 			$('#recallOrders .timer').empty();
 			let actualDate = new Date();
 			let timerCount = (Math.floor((actualDate - previousOrderDate[idPreviousOrder])/1000)) < 999 ? Math.floor((actualDate - previousOrderDate[idPreviousOrder])/1000) : 999;
-			$('#recallOrders .timer').append(timerCount);
+			$('#recallOrders .timer').text(timerCount);
 			let recalibration = $('#recallOrders').height() > 500 ? `-` : `+`; 
 			$('#recallOrders').css("top", `calc(50vh  ${ recalibration + " " + $('#recallOrders').height() }px / 2)`);
 			isFullWidthOrder[idPreviousOrder] ? $('.stateRecall').css("width", "100%") : $('.stateRecall').removeAttr('style'); 
@@ -333,14 +334,14 @@ const onOff = (isLineO) => {
 		socket.emit("lineOpen", isLineOpen);
 		$("#stateLine").empty();
 		$("#stateLine").css("color", "green");
-		$("#stateLine").append(" ON");
+		$("#stateLine").text(" ON");
 	}
 	else{
 		isLineOpen = false;
 		socket.emit("lineOpen", isLineOpen);
 		$("#stateLine").empty();
 		$("#stateLine").removeAttr('style');
-		$("#stateLine").append("OFF");
+		$("#stateLine").text("OFF");
 	}
 }
 
@@ -363,7 +364,7 @@ const recall = (orderToDisplay = null) => {
 		$('#recallOrders .timer').empty();
 		let actualDate = new Date();
 		let timerCount = (Math.floor((actualDate - previousOrderDate[idPreviousOrder])/1000)) < 999 ? Math.floor((actualDate - previousOrderDate[idPreviousOrder])/1000) : 999;
-		$('#recallOrders .timer').append(timerCount);
+		$('#recallOrders .timer').text(timerCount);
 		let recalibration = $('#recallOrders').height() > 500 ? `-` : `+`; 
 		$('#recallOrders').css("top", `calc(50vh  ${ recalibration + " " + $('#recallOrders').height() }px / 2)`);
 
@@ -476,7 +477,7 @@ const addCommand = (jsonArray, timer = 0, state = "Total") => {
 		$("div.command:last-of-type").addClass("hidden");
 		hiddenCommand++;
 		$("#pendingOrders").empty();
-		$("#pendingOrders").append(`${hiddenCommand} More Pending Orders >>`);
+		$("#pendingOrders").append(`${htmlspecialchars(hiddenCommand)} More Pending Orders >>`);
 		$("#pendingOrders").css({"visibility": "visible",
 								 "left": `calc(100vw - ${$("#pendingOrders").width()}px)`});
 	}
@@ -529,27 +530,22 @@ const cancelCommand = (commandName) => {
 
 }
 
-const addArticle = (commandName, article, quantity, displayPlus = false, category) => {
+const isDisplayable = (category) => {
+	if(category == "kitchen" && PORT != 8081){ return true; }
+	else if(category == "fries" && PORT >= 8082){ return true; }
+	else if(category == "sauce" && PORT >= 8082){ return true; }
+	else if(category == "beverage" && ( PORT == 8081 || PORT == 8083 )){ return true; }
+	else{ return false; }
+}
+
+const addArticle = (commandName, article, quantity, displayPlus = false, category = "") => {
+	if(!isDisplayable(category)){
+		console.log("nope");
+		return;
+	}
 	let commandArray = [];
 	let commandArrayQuantity = [];
-	if($(`.command[value="${commandName}"]`).length == 0 && PORT == 8081){ //add when beverage
-		const orderData = {
-			order: {
-			  order_number: commandName,
-			  items: [
-				{
-				  item_name: article,
-				  quantity: quantity,
-				  addons: [],
-				  remove: [],
-				  category: category
-				}
-			  ]
-			}
-		  };
-		addCommand(orderData);
-	}
-	$(`.command[value="${commandName}"] .order p`).each(function() {
+	$(`.command[value="${commandName}"] .order .${category} p`).each(function() {
 		var textParts = $(this).text().split(' '); 
 		var quantity = textParts[0]; 
 		var itemName = textParts.slice(1).join(' '); 
@@ -560,27 +556,28 @@ const addArticle = (commandName, article, quantity, displayPlus = false, categor
 	if(commandArray.indexOf(article)!=-1){
 		let index = commandArray.indexOf(article);
 		let outQuantity = +commandArrayQuantity[index] + quantity;
-		$(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).empty();
+		console.log(`.command[value="${commandName}"] .order .${category} p:nth-child(${index + 1})`);
+		$(`.command[value="${commandName}"] .order .${category} p:nth-child(${index + 1})`).empty();
 		let plusImage = displayPlus ? `<img src="svg/add.svg" alt="add" style="width:70px;" class="blinkGradualy"/>` : ``;
-		if($(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).hasClass('text-strikethrough')){
-			$(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).removeClass('text-strikethrough');
+		if($(`.command[value="${commandName}"] .order .${category} p:nth-child(${index + 1})`).hasClass('text-strikethrough')){
+			$(`.command[value="${commandName}"] .order .${category} p:nth-child(${index + 1})`).removeClass('text-strikethrough');
 			outQuantity = quantity;
 		}
-		$(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).append(`${htmlspecialchars(plusImage)}${htmlspecialchars(outQuantity)} ${htmlspecialchars(article)}`);
-		$(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).css({"display": "flex", 
+		$(`.command[value="${commandName}"] .order .${category} p:nth-child(${index + 1})`).append(`${plusImage}${htmlspecialchars(outQuantity)} ${htmlspecialchars(article)}`);
+		$(`.command[value="${commandName}"] .order .${category} p:nth-child(${index + 1})`).css({"display": "flex", 
 																					"align-items": "center"});
 	}
 	else{
-		console.log(`.command[value="${commandName}"] .order .${category}`);
 		$(`.command[value="${commandName}"] .order .${category}`).append(`<p>${htmlspecialchars(quantity)} ${htmlspecialchars(article)}</p>`);
 	}
 
 }
 
-const removeArticle = (commandName, article, quantity, displayLess = false) => {
+const removeArticle = (commandName, article, quantity, displayLess = false, category = "") => {
+	console.log(category);
 	let commandArray = [];
 	let commandArrayQuantity = [];
-	$(`.command[value="${commandName}"] .order p`).each(function() {
+	$(`.command[value="${commandName}"] .order .${category} p`).each(function() {
 		var textParts = $(this).text().split(' '); 
 		var quantity = textParts[0]; 
 		var itemName = textParts.slice(1).join(' '); 
@@ -592,15 +589,15 @@ const removeArticle = (commandName, article, quantity, displayLess = false) => {
 	let outQuantity = +commandArrayQuantity[index] - quantity;
 	if(outQuantity <= 0){
 		outQuantity = +commandArrayQuantity[index];
-		$(`.command[value="${commandName}"] .order p:nth-child(${index + 1}) > img`).remove();
-		$(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).addClass('text-strikethrough');
+		$(`.command[value="${commandName}"] .order .${category} p:nth-child(${index + 1}) > img`).remove();
+		$(`.command[value="${commandName}"] .order .${category} p:nth-child(${index + 1})`).addClass('text-strikethrough');
 		displayLess = false;
 		
 	}
-	$(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).empty();
+	$(`.command[value="${commandName}"] .order .${category} p:nth-child(${index + 1})`).empty();
 	let lessImage = displayLess ? `<img src="svg/remove.svg" alt="add" style="width:70px;" class="blinkGradualy"/>` : ``;
-	$(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).append(`${lessImage}${outQuantity} ${article}`);
-	if(displayLess) $(`.command[value="${commandName}"] .order p:nth-child(${index + 1})`).css({"display": "flex", 
+	$(`.command[value="${commandName}"] .order .${category} p:nth-child(${index + 1})`).append(`${lessImage}${htmlspecialchars(outQuantity)} ${htmlspecialchars(article)}`);
+	if(displayLess) $(`.command[value="${commandName}"] .order .${category} p:nth-child(${index + 1})`).css({"display": "flex", 
 																								"align-items": "center"});
 	
 
@@ -634,7 +631,7 @@ $( "document" ).ready(function() {
 				  });
 			}
     		$(this).empty();
-    		$(this).append(sec);
+    		$(this).text(sec);
 		});
     	
      }, 1000);
@@ -642,7 +639,7 @@ $( "document" ).ready(function() {
 	 var hour = setInterval(function() { 
 		let datetime = new Date();
 		$("#hour").empty();
-		$("#hour").append(("0" + datetime.getHours()).slice(-2)+':'+("0" + datetime.getMinutes()).slice(-2)+':'+("0" + datetime.getSeconds()).slice(-2));
+		$("#hour").text(("0" + datetime.getHours()).slice(-2)+':'+("0" + datetime.getMinutes()).slice(-2)+':'+("0" + datetime.getSeconds()).slice(-2));
 		if($('div').hasClass('command') && !isOrderSelected){
 			$('.command:first').attr('id', 'selected');
 			isOrderSelected = true;

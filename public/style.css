@@ -188,19 +188,23 @@ body{
     margin-top: 4px;
     border-top: solid 4px red;
     border-right: solid 20px red;
+    padding-bottom: 5px;
 }
 
 .fries:has(p){
     margin-top: 4px;
     border-top: solid 4px yellow;
     border-right: solid 20px yellow;
-    display: none;
+    padding-bottom: 5px;
+
 }
 
 .beverage:has(p){
     margin-top: 4px;
     border-top: solid 4px green;
     border-right: solid 20px green;
+    padding-bottom: 5px;
+
 }
 
 
@@ -208,7 +212,7 @@ body{
     margin-top: 4px;
     border-top: solid 4px cyan;
     border-right: solid 20px cyan;
-
+    padding-bottom: 5px;
 }
 
 
@@ -216,6 +220,7 @@ body{
     margin-top: 4px;
     border-top: solid 4px black;
     border-right: solid 20px black;
+    padding-bottom: 5px;
 
 }
 
@@ -231,6 +236,7 @@ body{
     align-items: center;
     justify-content: space-evenly;
     flex-wrap: nowrap;
+    
 }
 
 .button{

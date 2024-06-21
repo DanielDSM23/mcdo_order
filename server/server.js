@@ -77,6 +77,41 @@ const createServer = (port, name) => {
       if(Boolean(Object.keys(commandName).length)){
         ioInstance.emit('add-product', `${commandName},${article},${quantity},${category}`);
         res.status(200).send('ok');
+        //find order number
+        console.log(commandName);
+        let elementIndexCommand = null;
+        for(let i=0; i<currentOrders.length; i++){
+          if(currentOrders[i]['order']['order_number'] == commandName){
+            elementIndexCommand = i;
+            console.log(i);
+            break;
+          }
+        }
+        let elementProduct = null;
+        for(let i=0; i<currentOrders[elementIndexCommand]['order']['items'].length; i++){
+          if (currentOrders[elementIndexCommand]['order']['items'][i]["item_name"] == article){
+            elementProduct = i;
+          } 
+        }
+        console.log(elementProduct);
+        if(elementProduct == null){ //not same product
+          if(elementIndexCommand != null){
+            let newItem={
+              item_name: article,
+              quantity: quantity,
+              addons: [],
+              remove: [],
+              category: category
+            };
+            currentOrders[elementIndexCommand].order.items.push(newItem);
+            console.log("added");
+          }
+        }
+        else{ //same product
+          actualQuantity = currentOrders[elementIndexCommand]['order']['items'][elementProduct]["quantity"];
+          newQuantity = actualQuantity + quantity;
+          currentOrders[elementIndexCommand]['order']['items'][elementProduct]["quantity"] = newQuantity;
+        }
       } else {
         res.status(200).send('error');
       }
@@ -86,8 +121,9 @@ const createServer = (port, name) => {
       const commandName = req.body.commandName;
       const article = req.body.article;
       const quantity = req.body.quantity;
+      const category = req.body.category;
       if(Boolean(Object.keys(commandName).length)){
-        ioInstance.emit('remove-product', `${commandName},${article},${quantity}`);
+        ioInstance.emit('remove-product', `${commandName},${article},${quantity},${category}`);
         res.status(200).send('ok');
       } else {
         res.status(200).send('error');
