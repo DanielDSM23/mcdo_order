@@ -122,14 +122,32 @@ const createServer = (port, name) => {
       const article = req.body.article;
       const quantity = req.body.quantity;
       const category = req.body.category;
-      if(Boolean(Object.keys(commandName).length)){
+    
+      if (Boolean(Object.keys(commandName).length)) {
         ioInstance.emit('remove-product', `${commandName},${article},${quantity},${category}`);
-        res.status(200).send('ok');
+        const order = currentOrders.find(order => order.order.order_number === commandName);
+        if (order) {
+          const itemIndex = order.order.items.findIndex(item => item.item_name === article && item.category === category);
+    
+          if (itemIndex > -1) {
+            const item = order.order.items[itemIndex];
+            if (item.quantity > quantity) {
+              item.quantity -= quantity;
+            } else {
+              order.order.items.splice(itemIndex, 1);
+            }
+            res.status(200).send('ok');
+          } else {
+            res.status(200).send('error');
+          }
+        } else {
+          res.status(200).send('error');
+        }
       } else {
         res.status(200).send('error');
       }
     });
-
+    
     appInstance.get('/api/get-command', (req, res) => {
       res.status(200).send(currentOrders);
     });
