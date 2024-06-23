@@ -541,9 +541,11 @@ const isDisplayable = (category) => {
 }
 
 const addArticle = (commandName, article, quantity, displayPlus = false, category = "") => {
+	firstProductBeverage = false;
 	if(PORT == 8081){
 		if($(`.command[value="${commandName}"]`).length == 0){
 			if(category == "beverage"  || category == "dessert"){
+				console.log("quantity : ", quantity);
 				const orderJson = {
 					order: {
 					  order_number: commandName,
@@ -559,6 +561,7 @@ const addArticle = (commandName, article, quantity, displayPlus = false, categor
 					}
 				  };
 				addCommand(orderJson);
+				firstProductBeverage = true;
 			}
 		}
 	}
@@ -596,6 +599,10 @@ const addArticle = (commandName, article, quantity, displayPlus = false, categor
 		newQuantity = actualQuantity + quantity;
 		jsonObjectCommands[elementIndexCommand]['order']['items'][elementProduct]["quantity"] = newQuantity;
 	}
+	if(!isDisplayable(category) || firstProductBeverage){
+		console.log("nope");
+		return;
+	}
 	let commandArray = [];
 	let commandArrayQuantity = [];
 	$(`.command[value="${commandName}"] .order .${category} p`).each(function() {
@@ -606,10 +613,6 @@ const addArticle = (commandName, article, quantity, displayPlus = false, categor
 		commandArray.push(itemName); 
 	});
 	console.log(commandArray);
-	if(!isDisplayable(category)){
-		console.log("nope");
-		return;
-	}
 	if(commandArray.indexOf(article)!=-1){
 		let index = commandArray.indexOf(article);
 		let outQuantity = +commandArrayQuantity[index] + quantity;
