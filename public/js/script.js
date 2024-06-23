@@ -282,7 +282,9 @@ const bump = () => {
 		$("#pendingOrders").css("visibility", "hidden");
 	}
 	//recover json code and send to the OAT
+	console.log(jsonObjectCommands);
 	jsonToSend = jsonObjectCommands[orderSelected - 1]
+	console.log(jsonToSend);
 	jsonObjectCommands.splice(orderSelected - 1, 1);
 	
 	//Send JSON //TODO
@@ -543,6 +545,40 @@ const addArticle = (commandName, article, quantity, displayPlus = false, categor
 		console.log("nope");
 		return;
 	}
+	// add to client side array
+	let elementIndexCommand = null;
+	for(let i=0; i<jsonObjectCommands.length; i++){
+		if(jsonObjectCommands[i]['order']['order_number'] == commandName){
+		elementIndexCommand = i;
+		console.log(i);
+		break;
+		}
+	}
+	let elementProduct = null;
+	for(let i=0; i<jsonObjectCommands[elementIndexCommand]['order']['items'].length; i++){
+		if (jsonObjectCommands[elementIndexCommand]['order']['items'][i]["item_name"] == article){
+		elementProduct = i;
+		} 
+	}
+	console.log(elementProduct);
+	if(elementProduct == null){ //not same product
+		if(elementIndexCommand != null){
+		let newItem={
+			item_name: article,
+			quantity: quantity,
+			addons: [],
+			remove: [],
+			category: category
+		};
+		jsonObjectCommands[elementIndexCommand].order.items.push(newItem);
+		console.log("added");
+		}
+	}
+	else{ //same product
+		actualQuantity = jsonObjectCommands[elementIndexCommand]['order']['items'][elementProduct]["quantity"];
+		newQuantity = actualQuantity + quantity;
+		jsonObjectCommands[elementIndexCommand]['order']['items'][elementProduct]["quantity"] = newQuantity;
+	}
 	let commandArray = [];
 	let commandArrayQuantity = [];
 	$(`.command[value="${commandName}"] .order .${category} p`).each(function() {
@@ -574,6 +610,20 @@ const addArticle = (commandName, article, quantity, displayPlus = false, categor
 }
 
 const removeArticle = (commandName, article, quantity, displayLess = false, category = "") => {
+	//remove in jsonObjectCommand client side array.
+	let order = jsonObjectCommands.find(order => order.order.order_number === commandName);
+	if (order) {
+		const itemIndex = order.order.items.findIndex(item => item.item_name === article && item.category === category);
+		if (itemIndex > -1) {
+			const item = order.order.items[itemIndex];
+			if (item.quantity > quantity) {
+				item.quantity -= quantity;
+			}
+			else {
+				order.order.items.splice(itemIndex, 1);
+			}
+		}
+	}
 	console.log(category);
 	let commandArray = [];
 	let commandArrayQuantity = [];
