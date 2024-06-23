@@ -541,9 +541,26 @@ const isDisplayable = (category) => {
 }
 
 const addArticle = (commandName, article, quantity, displayPlus = false, category = "") => {
-	if(!isDisplayable(category)){
-		console.log("nope");
-		return;
+	if(PORT == 8081){
+		if($(`.command[value="${commandName}"]`).length == 0){
+			if(category == "beverage"  || category == "dessert"){
+				const orderJson = {
+					order: {
+					  order_number: commandName,
+					  items: [
+						{
+						  item_name: article,
+						  quantity: quantity,
+						  addons: [],
+						  remove: [],
+						  category: category
+						}
+					  ]
+					}
+				  };
+				addCommand(orderJson);
+			}
+		}
 	}
 	// add to client side array
 	let elementIndexCommand = null;
@@ -589,6 +606,10 @@ const addArticle = (commandName, article, quantity, displayPlus = false, categor
 		commandArray.push(itemName); 
 	});
 	console.log(commandArray);
+	if(!isDisplayable(category)){
+		console.log("nope");
+		return;
+	}
 	if(commandArray.indexOf(article)!=-1){
 		let index = commandArray.indexOf(article);
 		let outQuantity = +commandArrayQuantity[index] + quantity;

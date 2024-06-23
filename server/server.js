@@ -42,6 +42,7 @@ const createServer = (port, name) => {
       const removeCommandNbr = req.body;
       if(Boolean(Object.keys(removeCommandNbr).length)){
         currentOrders.splice(removeCommandNbr.number-1, 1);
+        createdAtOrders.splice(removeCommandNbr.number-1, 1);
         res.status(200).send('ok');
       } else {
         res.status(200).send('error');
