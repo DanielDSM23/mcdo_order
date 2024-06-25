@@ -251,9 +251,37 @@ const bump = () => {
 	socket.emit("bump", true);
 	//let commandNumber = $(`.command:nth-child(${orderSelected})`).attr('value');
 	//check if user has command selected
-	if($('#selected').length == 0){
+	if($('#selected').length == 0 || $('#selected .state').text() == "Total"){
 		return;
 	}
+	//queries
+
+	$.ajax({
+		url: `http://${DOMAIN_NAME}:${PORT}/api/remove-command`,
+		type: 'POST', 
+		contentType: 'application/json',
+		data: JSON.stringify({
+			"number": orderSelected
+		}),
+		success: function(response) {
+			console.log(response);
+		},
+		error: function(error) {
+			console.error(error);
+		}
+	});			
+	$.get(`http://${DOMAIN_NAME}:${PORT}/api/bump`, function (data, status) {
+		console.log('Response:', data);
+		console.log('Status:', status);
+	})
+	.done(function () {
+		console.log('GET request succeeded');
+	})
+	.fail(function (jqXHR, textStatus, errorThrown) {
+		console.error('GET request failed:', textStatus, errorThrown);
+	});
+
+	////
 	let htmlCode =$("#selected.command").html();
 	let width = $("#selected.command .order").width()
 	let height = $("#selected.command .order").height()
@@ -300,6 +328,25 @@ const bump = () => {
 	  
 	  $.ajax(settings).done(function (response) {
 		console.log(response);
+		setTimeout(() => {
+			var settings = {
+				"url": `http://localhost:${nextPort()}/api/modify-state`,
+				"method": "POST",
+				"timeout": 0,
+				"headers": {
+				  "Content-Type": "application/json"
+				},
+				"data": JSON.stringify({
+				  "commandName": jsonToSend.order.order_number,
+				  "newState": "Payé"
+				}),
+			  };
+			  
+			  $.ajax(settings).done(function (response) {
+				console.log(response);
+			  });
+		}, 300);
+
 	  });
 	
 	console.log("impression ticket");
@@ -729,30 +776,6 @@ $( "document" ).ready(function() {
 		console.log(keyCode);
 		if(keyCode === 13) { 
 			doThis = false;
-			$.ajax({
-				url: `http://${DOMAIN_NAME}:${PORT}/api/remove-command`,
-				type: 'POST', 
-				contentType: 'application/json',
-				data: JSON.stringify({
-					"number": orderSelected
-				}),
-				success: function(response) {
-					console.log(response);
-				},
-				error: function(error) {
-					console.error(error);
-				}
-			});			
-			$.get(`http://${DOMAIN_NAME}:${PORT}/api/bump`, function (data, status) {
-				console.log('Response:', data);
-				console.log('Status:', status);
-			})
-			.done(function () {
-				console.log('GET request succeeded');
-			})
-			.fail(function (jqXHR, textStatus, errorThrown) {
-				console.error('GET request failed:', textStatus, errorThrown);
-			});
 			bump();
 		}
 		if(keyCode === 110) { 
